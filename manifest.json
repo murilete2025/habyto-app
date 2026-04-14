@@ -1,0 +1,22 @@
+{
+  "name": "Habyto Premium",
+  "short_name": "Habyto",
+  "description": "Seu assistente pessoal de emagrecimento e saúde com IA.",
+  "start_url": "/?source=pwa",
+  "display": "standalone",
+  "background_color": "#0f9d8a",
+  "theme_color": "#0f9d8a",
+  "orientation": "portrait",
+  "icons": [
+    {
+      "src": "/quiz/assets/age-30-39.png",
+      "sizes": "192x192",
+      "type": "image/png"
+    },
+    {
+      "src": "/quiz/assets/age-30-39.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ]
+}

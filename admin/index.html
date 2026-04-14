@@ -328,6 +328,35 @@
             </div>
             <button class="btn-save" style="margin-top:12px" onclick="savePrices()">Salvar Preços</button>
           </div>
+
+          <!-- OPENAI KEY -->
+          <div class="s-card" style="grid-column:1/-1; border:2px solid #fef3c7; background:#fffbeb;">
+            <div style="display:flex;align-items:center;gap:10px;margin-bottom:6px">
+              <span style="font-size:22px">🤖</span>
+              <h3 style="margin:0">Chave da OpenAI (API Key)</h3>
+              <span style="margin-left:auto;background:#f59e0b;color:#fff;font-size:11px;font-weight:700;padding:3px 10px;border-radius:99px;">SEGREDO</span>
+            </div>
+            <p style="color:#92400e;font-size:13px;margin-bottom:14px">
+              Esta chave é usada para gerar os planos de IA e analisar fotos de refeições.<br>
+              Ela é salva de forma segura no Firestore e lida pelo servidor. Nunca compartilhe.
+            </p>
+            <div style="position:relative">
+              <input class="s-input" id="cfg-openai" type="password"
+                placeholder="sk-proj-…"
+                autocomplete="off"
+                style="padding-right:50px;font-family:monospace;letter-spacing:1px;margin-bottom:10px;border-color:#f59e0b" />
+              <button onclick="toggleKeyVisibility()" id="btn-eye"
+                style="position:absolute;right:12px;top:12px;background:none;border:none;cursor:pointer;font-size:18px;"
+                title="Mostrar/ocultar chave">👁️</button>
+            </div>
+            <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap">
+              <button class="btn-save" style="background:#f59e0b" onclick="saveOpenAiKey()">🔑 Salvar Chave</button>
+              <span id="openai-status" style="font-size:13px;color:var(--muted);"></span>
+            </div>
+            <div id="openai-warning" style="display:none;margin-top:12px;background:#fee2e2;border-radius:10px;padding:12px;font-size:13px;color:#b91c1c;font-weight:600">
+              ⚠️ Nenhuma chave configurada! As funções de IA (plano semanal e análise de fotos) não vão funcionar até você salvar uma chave válida.
+            </div>
+          </div>
         </div>
       </div>
 
@@ -554,6 +583,19 @@ async function loadSettings() {
     fill('cfg-quiz', d.quiz_url); fill('cfg-mp-m', d.mp_mensal);
     fill('cfg-mp-a', d.mp_anual); fill('cfg-fasting', d.fasting_default);
     fill('cfg-pm', d.price_mensal); fill('cfg-pa', d.price_anual);
+
+    // Chave OpenAI
+    const keyEl = document.getElementById('cfg-openai');
+    const statusEl = document.getElementById('openai-status');
+    const warnEl   = document.getElementById('openai-warning');
+    if (d.openai_key) {
+      if (keyEl) keyEl.value = d.openai_key;
+      if (statusEl) statusEl.textContent = '✅ Chave configurada';
+      if (warnEl)   warnEl.style.display = 'none';
+    } else {
+      if (statusEl) statusEl.textContent = '❌ Chave não configurada';
+      if (warnEl)   warnEl.style.display = 'block';
+    }
   } catch(e) { console.warn('Settings:', e.message); }
 }
 
@@ -572,6 +614,35 @@ async function savePrices() {
     await db.collection('config').doc('global').set({ price_mensal: pm, price_anual: pa }, { merge: true });
     toast('✅ Preços salvos!');
   } catch(e) { toast('❌ Erro: ' + e.message); }
+}
+
+// ── OPENAI KEY ─────────────────────────────────────────
+async function saveOpenAiKey() {
+  const keyEl    = document.getElementById('cfg-openai');
+  const statusEl = document.getElementById('openai-status');
+  const warnEl   = document.getElementById('openai-warning');
+  const val = keyEl?.value?.trim();
+
+  if (!val) { toast('❌ Digite uma chave válida antes de salvar.'); return; }
+  if (!val.startsWith('sk-')) { toast('⚠️ Chave inválida. Deve começar com "sk-"'); return; }
+
+  try {
+    await db.collection('config').doc('global').set({ openai_key: val }, { merge: true });
+    if (statusEl) statusEl.textContent = '✅ Chave salva com sucesso!';
+    if (warnEl)   warnEl.style.display = 'none';
+    toast('🔑 Chave da OpenAI salva com sucesso!');
+  } catch(e) { toast('❌ Erro ao salvar: ' + e.message); }
+}
+
+function toggleKeyVisibility() {
+  const inp = document.getElementById('cfg-openai');
+  const btn = document.getElementById('btn-eye');
+  if (!inp) return;
+  if (inp.type === 'password') {
+    inp.type = 'text'; btn.textContent = '🙈';
+  } else {
+    inp.type = 'password'; btn.textContent = '👁️';
+  }
 }
 </script>
 </body>

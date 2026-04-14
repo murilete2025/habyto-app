@@ -14,10 +14,23 @@ export default async function handler(req, res) {
 
   try {
     const userData = req.body;
-    const apiKey = process.env.OPENAI_API_KEY;
+    let apiKey = process.env.OPENAI_API_KEY;
+
+    // Fallback: Tenta buscar a chave salva no Painel Admin (Firestore)
+    if (!apiKey) {
+      try {
+        const fbRes = await fetch("https://firestore.googleapis.com/v1/projects/app-jejum-emagrecimento/databases/(default)/documents/config/global");
+        const fbData = await fbRes.json();
+        if (fbData?.fields?.openai_key?.stringValue) {
+          apiKey = fbData.fields.openai_key.stringValue;
+        }
+      } catch (err) {
+        console.warn("Falha ao ler chave do Firebase:", err.message);
+      }
+    }
 
     if (!apiKey) {
-      return res.status(500).json({ error: 'Chave da OpenAI não configurada no Vercel.' });
+      return res.status(500).json({ error: 'Chave da OpenAI não configurada no Vercel nem no Admin.' });
     }
 
     const weight = userData.weight || 70;

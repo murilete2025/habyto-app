@@ -636,6 +636,24 @@ function loadDashboard() {
       var banner = document.getElementById("profile-banner");
       if (banner) banner.classList.toggle("hidden", !!(d.age && d.height && d.weight && d.gender));
 
+      if (d.subscriptionStatus === 'expired' || d.subscriptionStatus === 'canceled') {
+        const blurDiv = document.createElement('div');
+        blurDiv.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,0.85);backdrop-filter:blur(8px);z-index:99999;display:flex;align-items:center;justify-content:center;text-align:center;padding:20px';
+        blurDiv.innerHTML = `
+          <div style="background:var(--surface);padding:30px;border-radius:24px;max-width:350px;color:var(--text);box-shadow:0 24px 60px rgba(0,0,0,0.2);">
+            <div style="font-size:40px;margin-bottom:10px">⚠️</div>
+            <h2 style="font-size:22px;margin-bottom:10px;font-weight:800;">Acesso Suspenso</h2>
+            <p style="color:var(--muted);margin-bottom:24px;line-height:1.5;font-size:15px;font-weight:500;">
+              Sua assinatura consta como <strong>${d.subscriptionStatus === 'expired' ? 'Vencida' : 'Cancelada'}</strong>. 
+              Regularize o pagamento para voltar a acessar o seu plano.
+            </p>
+            <button onclick="auth.signOut();location.reload()" style="background:var(--green);color:#fff;border:none;padding:14px 20px;border-radius:12px;font-weight:700;font-size:16px;cursor:pointer;width:100%">Desconectar e Sair</button>
+          </div>
+        `;
+        document.body.appendChild(blurDiv);
+        return; // Interrompe o carregamento do painel
+      }
+
       if (d.lastGeneratedPlan && d.lastGeneratedPlan.weekly_plan) {
         weeklyPlan = d.lastGeneratedPlan.weekly_plan;
         renderMeals(currentDayIndex);

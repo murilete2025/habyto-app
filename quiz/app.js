@@ -215,6 +215,21 @@ function goToResults() {
   if (formEl) formEl.classList.add('hidden');
   if (loaderEl) loaderEl.classList.remove('hidden');
 
+  // CAPTURA DO LEAD (Remarketing): Salva o email antes da pessoa ver o preço
+  fetch("https://firestore.googleapis.com/v1/projects/app-jejum-emagrecimento/databases/(default)/documents/leads", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({
+      fields: {
+        email: { stringValue: email },
+        createdAt: { timestampValue: new Date().toISOString() },
+        status: { stringValue: "abandonou_carrinho" },
+        age: { integerValue: Math.round(ageVal) },
+        weight: { integerValue: Math.round(cw) }
+      }
+    })
+  }).catch(e => console.log("Erro silencioso salvar lead:", e));
+
   // Fake AI Generation Time Before Results (4 seconds)
   setTimeout(() => {
       // Navigate to results

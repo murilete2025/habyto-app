@@ -121,21 +121,27 @@ document.getElementById("auth-form").addEventListener("submit", function(e) {
   var promise = isLogin
     ? auth.signInWithEmailAndPassword(email, pass)
     : auth.createUserWithEmailAndPassword(email, pass).then(function(cred) {
-        var quiz = null;
-        try { quiz = JSON.parse(localStorage.getItem("quiz_results") || "null"); } catch(e) {}
-        var params = new URLSearchParams(window.location.search);
-        return db.collection("users").doc(cred.user.uid).set({
-          email: email,
-          createdAt: new Date(),
-          isFasting: false, fastStartTime: null, waterGlasses: 0,
-          age:        params.get("age")        || (quiz && quiz.age2)           || "30",
-          height:     params.get("height")     || (quiz && quiz.heightCm)       || "165",
-          weight:     params.get("weight")     || (quiz && quiz.currentWeight)  || "70",
-          goalWeight: params.get("goalWeight") || (quiz && quiz.goalWeight)     || "60",
-          gender:     params.get("gender")     || (quiz && quiz.gender)         || "feminino",
-          body:       params.get("body")       || (quiz && quiz.startPoint)     || "",
-          quizResults: quiz,
-        }).then(function() { localStorage.removeItem("quiz_results"); });
+        // Verifica se o lead já foi marcado como PAGO pelo webhook
+        return db.collection("leads").where("email", "==", email.toLowerCase()).where("status", "==", "pago").get().then(function(snap) {
+          var initialStatus = snap.empty ? "expired" : "active";
+          var quiz = null;
+          try { quiz = JSON.parse(localStorage.getItem("quiz_results") || "null"); } catch(e) {}
+          var params = new URLSearchParams(window.location.search);
+          
+          return db.collection("users").doc(cred.user.uid).set({
+            email: email,
+            createdAt: new Date(),
+            subscriptionStatus: initialStatus,
+            isFasting: false, fastStartTime: null, waterGlasses: 0,
+            age:        params.get("age")        || (quiz && quiz.age2)           || "30",
+            height:     params.get("height")     || (quiz && quiz.heightCm)       || "165",
+            weight:     params.get("weight")     || (quiz && quiz.currentWeight)  || "70",
+            goalWeight: params.get("goalWeight") || (quiz && quiz.goalWeight)     || "60",
+            gender:     params.get("gender")     || (quiz && quiz.gender)         || "feminino",
+            body:       params.get("body")       || (quiz && quiz.startPoint)     || "",
+            quizResults: quiz,
+          }).then(function() { localStorage.removeItem("quiz_results"); });
+        });
       });
 
   promise.catch(function(err) {

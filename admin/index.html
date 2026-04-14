@@ -379,6 +379,25 @@
             <button class="btn-save" style="margin-top:15px; width:100%" onclick="savePixels()">🚀 Salvar IDs de Rastreamento</button>
           </div>
 
+          <!-- WEBHOOKS -->
+          <div class="s-card" style="grid-column:1/-1; border:2px solid #e0e7ff; background:#f5f3ff;">
+            <div style="display:flex;align-items:center;gap:10px;margin-bottom:6px">
+              <span style="font-size:22px">🔗</span>
+              <h3 style="margin:0">Webhook & Pagamentos Automáticos</h3>
+              <span style="margin-left:auto;background:#6366f1;color:#fff;font-size:11px;font-weight:700;padding:3px 10px;border-radius:99px;">AUTOMAÇÃO</span>
+            </div>
+            <p style="color:#3730a3;font-size:13px;margin-bottom:14px">
+              Sua URL de Webhook: <code style="background:#fff; padding:2px 6px; border-radius:4px; font-weight:700;">https://habyto.vercel.app/api/webhook/mercadopago</code><br>
+              <em>(Copie e cole essa URL no painel do desenvolvedor do Mercado Pago)</em>
+            </p>
+            <div>
+              <label style="font-size:12px;font-weight:700;color:var(--muted);display:block;margin-bottom:4px">Mercado Pago Access Token (Bearer)</label>
+              <input class="s-input" id="cfg-mp-token" type="password" placeholder="APP_USR-..." style="margin-bottom:10px" />
+              <p style="font-size:11px; color:var(--muted); margin-bottom:12px">Necessário para que o sistema valide os pagamentos e libere o acesso automaticamente.</p>
+            </div>
+            <button class="btn-save" style="background:#6366f1; width:100%" onclick="saveCfg('mp_access_token','cfg-mp-token')">💾 Salvar Token de Integração</button>
+          </div>
+
           <!-- OPENAI KEY -->
           <div class="s-card" style="grid-column:1/-1; border:2px solid #fef3c7; background:#fffbeb;">
             <div style="display:flex;align-items:center;gap:10px;margin-bottom:6px">
@@ -699,9 +718,11 @@ async function loadSettings() {
     fill('cfg-mp-a', d.mp_anual); fill('cfg-fasting', d.fasting_default);
     fill('cfg-pm', d.price_mensal); fill('cfg-pa', d.price_anual);
     
-    // Pixels
     fill('cfg-pixel-fb', d.pixel_fb);
     fill('cfg-pixel-kwai', d.pixel_kwai);
+    
+    // Webhooks
+    fill('cfg-mp-token', d.mp_access_token);
 
     // Chave OpenAI
     const keyEl = document.getElementById('cfg-openai');

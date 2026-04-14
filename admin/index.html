@@ -204,6 +204,9 @@
         <div class="nav-link" onclick="goPage('leads')">
           <span class="nav-icon">🛒</span><span>Leads (Abandonos)</span>
         </div>
+        <div class="nav-link" onclick="goPage('posts')">
+          <span class="nav-icon">📝</span><span>Conteúdo (Blog)</span>
+        </div>
         <div class="nav-link" onclick="goPage('settings')">
           <span class="nav-icon">⚙️</span><span>Configurações</span>
         </div>
@@ -311,34 +314,35 @@
         </div>
       </div>
 
+      <!-- POSTS (BLOG) -->
+      <div class="page" id="page-posts">
+        <div class="page-title">Gerenciador de Conteúdo</div>
+        <div class="page-sub">Crie e gerencie postagens do blog, dicas e receitas para o app.</div>
+        <div class="card">
+          <div class="card-header">
+            <h3>Suas Postagens</h3>
+            <button class="btn-save" style="margin:0; padding:8px 16px; font-size:13px;" onclick="openPostModal()">➕ Novo Post</button>
+          </div>
+          <table>
+            <thead>
+              <tr>
+                <th>Título / Categoria</th>
+                <th>Data de Publicação</th>
+                <th>Ações</th>
+              </tr>
+            </thead>
+            <tbody id="tb-posts">
+              <tr class="empty-row"><td colspan="3">Carregando conteúdos...</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
       <!-- SETTINGS -->
       <div class="page" id="page-settings">
         <div class="page-title">Configurações</div>
         <div class="page-sub">Personalize o comportamento do Habyto.</div>
         <div class="settings-grid">
-          <!-- CONTEÚDO EM DESTAQUE -->
-          <div class="s-card" style="grid-column:1/-1; border:2px solid #ddd6fe; background:#f5f3ff;">
-            <div style="display:flex;align-items:center;gap:10px;margin-bottom:6px">
-              <span style="font-size:22px">📢</span>
-              <h3 style="margin:0">Conteúdo em Destaque (Dica do Dia)</h3>
-              <span style="margin-left:auto;background:#8b5cf6;color:#fff;font-size:11px;font-weight:700;padding:3px 10px;border-radius:99px;">FEED APP</span>
-            </div>
-            <p style="color:#5b21b6;font-size:13px;margin-bottom:14px">
-              Este conteúdo aparecerá no topo do Dashboard de todos os usuários ativos. Ideal para receitas, avisos ou motivação.
-            </p>
-            <div style="display:grid; gap:10px">
-              <div>
-                <label style="font-size:11px;font-weight:700;color:var(--muted);display:block;margin-bottom:4px">Título do Destaque</label>
-                <input class="s-input" id="cfg-feat-title" placeholder="Ex: Receita de Suco Detox" style="margin-bottom:10px" />
-              </div>
-              <div>
-                <label style="font-size:11px;font-weight:700;color:var(--muted);display:block;margin-bottom:4px">Texto / Descrição</label>
-                <textarea class="s-input" id="cfg-feat-text" style="height:80px; resize:none; font-family:inherit; padding:10px;" placeholder="Escreva aqui o conteúdo que o usuário lerá..."></textarea>
-              </div>
-            </div>
-            <button class="btn-save" style="background:#8b5cf6; width:100%; margin-top:10px" onclick="saveFeatured()">✨ Publicar no App</button>
-          </div>
-
           <div class="s-card">
             <h3>🔗 Link do Quiz</h3>
             <p>URL para anúncios e campanhas.</p>
@@ -564,14 +568,21 @@ function goPage(name) {
 // ── LOAD DATA ──────────────────────────────────────────
 let allUsers = [];
 let allLeads = [];
+let allPosts = [];
+
 async function loadData() {
   try {
-    // Adicionado LIMITE DE 500 USUÁRIOS para não estourar a memória (paginação simplificada)
+    // 1) Carregar Usuários
     const snap = await db.collection('users').orderBy('createdAt', 'desc').limit(500).get();
     allUsers = snap.docs.map(d => ({ id: d.id, ...d.data() }));
 
+    // 2) Carregar Leads
     const snapLeads = await db.collection('leads').orderBy('createdAt', 'desc').limit(500).get();
     allLeads = snapLeads.docs.map(d => ({ id: d.id, ...d.data() }));
+
+    // 3) Carregar Posts (Blog)
+    const snapPosts = await db.collection('posts').orderBy('createdAt', 'desc').limit(100).get();
+    allPosts = snapPosts.docs.map(d => ({ id: d.id, ...d.data() }));
 
     const total    = allUsers.length;
     const complete = allUsers.filter(u => u.age && u.height && u.weight && u.gender).length;
@@ -590,6 +601,7 @@ async function loadData() {
     renderRecent(allUsers.slice(0, 5));
     renderUsers(allUsers);
     renderLeadsTable();
+    renderPostsTable();
   } catch (e) {
     console.error(e);
     setEl('last-update', '⚠️ Erro ao carregar: ' + e.message);
@@ -631,6 +643,86 @@ function renderLeadsTable(q = '') {
   }).join('');
 }
 window.filterLeads = renderLeadsTable;
+
+// ── RENDER POSTS ──────────────────────────────────────────
+function renderPostsTable() {
+  const tb = document.getElementById('tb-posts');
+  if (!tb) return;
+  if (!allPosts.length) {
+    tb.innerHTML = '<tr class="empty-row"><td colspan="3">Nenhum conteúdo publicado.</td></tr>';
+    return;
+  }
+  tb.innerHTML = allPosts.map(p => {
+    return `<tr>
+      <td><div class="u-name">${p.title||'Sem título'}</div><div class="u-email">${p.category||'Geral'}</div></td>
+      <td>${fmt(p.createdAt)}</td>
+      <td>
+        <button class="btn-detail" style="background:#ef4444; color:#fff;" onclick="deletePost('${p.id}')">Excluir</button>
+      </td>
+    </tr>`;
+  }).join('');
+}
+
+window.openPostModal = function() {
+  const modal = document.getElementById('modal');
+  const body  = document.getElementById('modal-body');
+  document.getElementById('modal-title').textContent = "Novo Conteúdo (Blog)";
+  
+  body.innerHTML = `
+    <div style="display:grid; gap:12px;">
+      <div>
+        <label class="detail-label">Título da Postagem</label>
+        <input id="post-title" class="s-input" placeholder="Ex: 5 Dicas para Jejum..." />
+      </div>
+      <div>
+        <label class="detail-label">Categoria</label>
+        <select id="post-cat" class="s-input">
+          <option value="Dica do Dia">Dica do Dia</option>
+          <option value="Receita">Receita</option>
+          <option value="Motivação">Motivação</option>
+          <option value="Aviso">Aviso</option>
+        </select>
+      </div>
+      <div>
+        <label class="detail-label">Conteúdo (Texto)</label>
+        <textarea id="post-text" class="s-input" style="height:150px; resize:none;"></textarea>
+      </div>
+      <button class="btn-save" style="width:100%; height:45px;" onclick="savePost()">🚀 Publicar Agora</button>
+    </div>
+  `;
+  modal.classList.add('open');
+}
+
+window.savePost = async function() {
+  const title = document.getElementById('post-title').value;
+  const cat   = document.getElementById('post-cat').value;
+  const text  = document.getElementById('post-text').value;
+
+  if(!title || !text) { toast('Preencha título e texto!'); return; }
+
+  toast('Publicando...');
+  try {
+    await db.collection('posts').add({
+      title,
+      category: cat,
+      text,
+      createdAt: new Date()
+    });
+    toast('Publicado com sucesso!');
+    closeModal();
+    loadData();
+  } catch(e) { toast('Erro ao publicar.'); }
+}
+
+window.deletePost = async function(id) {
+  if(!confirm('Deseja excluir este post definitivamente?')) return;
+  toast('Excluindo...');
+  try {
+    await db.collection('posts').doc(id).delete();
+    toast('Excluído!');
+    loadData();
+  } catch(e) { toast('Erro ao excluir.'); }
+}
 
 // ── USERS TABLE ────────────────────────────────────────
 function renderUsers(users) {
@@ -746,9 +838,9 @@ async function loadSettings() {
     
     fill('cfg-mp-token', d.mp_access_token);
     
-    // Conteúdo
-    fill('cfg-feat-title', d.featured_title);
-    fill('cfg-feat-text', d.featured_text);
+    // Conteúdo antigo removido (migrado para Posts)
+    // fill('cfg-feat-title', d.featured_title);
+    // fill('cfg-feat-text', d.featured_text);
 
     // Chave OpenAI
     const keyEl = document.getElementById('cfg-openai');
@@ -793,15 +885,7 @@ window.savePixels = async function() {
   } catch(e) { toast('Erro ao salvar pixels.'); }
 }
 
-window.saveFeatured = async function() {
-  const title = document.getElementById('cfg-feat-title').value;
-  const text  = document.getElementById('cfg-feat-text').value;
-  toast('Publicando conteúdo...');
-  try {
-    await db.collection('config').doc('global').set({ featured_title: title, featured_text: text }, { merge: true });
-    toast('📢 Conteúdo publicado com sucesso!');
-  } catch(e) { toast('Erro ao publicar conteúdo.'); }
-}
+// Função saveFeatured removida - Migrado para sistema de Posts
 
 // ── OPENAI KEY ─────────────────────────────────────────
 window.saveOpenAiKey = async function() {

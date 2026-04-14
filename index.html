@@ -92,13 +92,14 @@
         <button onclick="showView('profile')" class="btn-sm">Completar</button>
       </div>
 
-      <!-- Conteúdo Administrativo (Dica do Dia) -->
-      <div id="featured-card" class="card" style="display:none; background: linear-gradient(135deg, #ddd6fe 0%, #f5f3ff 100%); border: 1px solid #c4b5fd;">
-        <div style="display:flex; align-items:center; gap:8px; margin-bottom:8px;">
-          <span style="font-size:18px;">💡</span>
-          <strong id="feat-title" style="font-size:14px; color:#5b21b6; text-transform:uppercase; letter-spacing:0.5px;">Destaque do Dia</strong>
+      <!-- BLOG / CONTEÚDO (FEED) -->
+      <div id="blog-section" style="display:none; margin-bottom:20px;">
+        <h3 style="font-size:16px; font-weight:800; color:var(--text); margin-bottom:12px; display:flex; align-items:center; gap:8px;">
+          <span>📝</span> Dicas & Receitas
+        </h3>
+        <div id="blog-feed" style="display:flex; flex-direction:column; gap:12px;">
+          <!-- JS Injects Posts Here -->
         </div>
-        <p id="feat-text" style="font-size:15px; color:#444; line-height:1.4; margin-bottom:0; font-weight:500;"></p>
       </div>
 
       <!-- Timer Jejum -->

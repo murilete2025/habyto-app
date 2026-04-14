@@ -559,30 +559,44 @@ if (btnSaveProf) btnSaveProf.addEventListener("click", function() {
     .finally(function() { btnSaveProf.textContent = "Salvar Perfil"; btnSaveProf.disabled = false; });
 });
 
-// ─── DASHBOARD CONTENT ─────────────────────────────────────
-function loadGlobalContent() {
-  db.collection("config").doc("global").get().then(function(doc) {
-    if (doc.exists) {
-      var data = doc.data();
-      var card = document.getElementById("featured-card");
-      var title = document.getElementById("feat-title");
-      var text = document.getElementById("feat-text");
-      
-      if (card && data.featured_text && data.featured_text.trim().length > 0) {
-        if (title) title.textContent = data.featured_title || "Destaque do Dia";
-        if (text) text.textContent = data.featured_text;
-        card.style.display = "block";
-      } else if (card) {
-        card.style.display = "none";
-      }
+// ─── DASHBOARD CONTENT (BLOG) ──────────────────────────────
+function loadBlogPosts() {
+  db.collection("posts").orderBy("createdAt", "desc").limit(5).get().then(function(snap) {
+    var section = document.getElementById("blog-section");
+    var feed = document.getElementById("blog-feed");
+    if (!feed || !section) return;
+
+    if (snap.empty) {
+      section.style.display = "none";
+      return;
     }
+
+    section.style.display = "block";
+    feed.innerHTML = snap.docs.map(function(doc) {
+      var p = doc.data();
+      return `
+        <div class="card" style="margin-bottom:0; cursor:pointer;" onclick="showPostDetail(\`${p.title}\`, \`${p.category}\`, \`${p.text.replace(/\n/g,'<br>')}\`)">
+          <div style="display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:6px;">
+            <strong style="font-size:15px; color:var(--text);">${p.title}</strong>
+            <span style="font-size:11px; font-weight:700; background:var(--green-light); color:var(--green); padding:2px 8px; border-radius:12px;">${p.category || 'Dica'}</span>
+          </div>
+          <p style="font-size:13px; color:var(--muted); overflow:hidden; display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical; line-height:1.4;">${p.text}</p>
+        </div>
+      `;
+    }).join('');
   });
+}
+
+function showPostDetail(title, cat, text) {
+  // Poderia abrir um modal, mas por simplicidade vamos usar um alert customizado ou apenas expandir.
+  // Vamos criar um modal simples no app se não houver.
+  alert(title + "\n\n" + text.replace(/<br>/g, '\n'));
 }
 
 // ─── LOAD DASHBOARD ──────────────────────────────────────
 function loadDashboard() {
   if (!currentUid) return;
-  loadGlobalContent();
+  loadBlogPosts();
   db.collection("users").doc(currentUid).get().then(function(snap) {
     if (snap.exists) {
       var d = snap.data();

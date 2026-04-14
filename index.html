@@ -1,0 +1,307 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
+  <title>Habyto – Wellness Premium</title>
+  <meta name="description" content="Seu assistente pessoal de emagrecimento e saúde com IA." />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800;900&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="style.css" />
+  <!-- Firebase Compat (não precisa de type=module) -->
+  <script src="https://www.gstatic.com/firebasejs/10.9.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.9.0/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.9.0/firebase-firestore-compat.js"></script>
+</head>
+<body>
+
+<!-- TOAST NOTIFICATIONS -->
+<div id="toast-container"></div>
+
+<!-- ───────── LOADER ───────── -->
+<div id="screen-loader" class="screen-overlay active">
+  <div class="loader-content">
+    <div class="loader-logo">H</div>
+    <div class="loader-spinner"></div>
+  </div>
+</div>
+
+<!-- ───────── AUTH ───────── -->
+<div id="screen-auth" class="screen-overlay" style="display:none;">
+  <div class="auth-card">
+    <div class="auth-logo">
+      <span class="logo-mark">H</span>
+      <span class="logo-name">Habyto</span>
+    </div>
+    <h1 id="auth-title">Bem-vinda de volta</h1>
+    <p id="auth-subtitle">Entre para acessar seu plano personalizado</p>
+
+    <form id="auth-form">
+      <div class="input-group">
+        <label>Email</label>
+        <input id="inp-email" type="email" placeholder="seu@email.com" required autocomplete="email" />
+      </div>
+      <div class="input-group">
+        <label>Senha</label>
+        <input id="inp-password" type="password" placeholder="••••••••" required />
+      </div>
+      <p id="auth-error" class="auth-error hidden"></p>
+      <button type="submit" id="btn-auth" class="btn-primary">Entrar</button>
+    </form>
+
+    <p class="auth-switch">
+      Não tem conta?
+      <button id="btn-toggle-auth" class="link-btn">Criar agora</button>
+    </p>
+  </div>
+</div>
+
+<!-- ───────── MAIN APP ───────── -->
+<div id="screen-app" style="display:none;">
+
+  <!-- HEADER -->
+  <header class="app-header">
+    <div class="header-left">
+      <p class="header-greeting">Olá,</p>
+      <h2 id="user-name">Usuário</h2>
+    </div>
+    <div class="header-right">
+      <div class="streak-chip">
+        <span class="streak-fire">🔥</span>
+        <span id="streak-count">0</span>
+      </div>
+    </div>
+  </header>
+
+  <!-- VIEWS -->
+  <main id="main-content">
+
+    <!-- ── DASHBOARD ── -->
+    <section id="view-dashboard" class="view active">
+
+      <!-- Banner perfil incompleto -->
+      <div id="profile-banner" class="banner-card hidden">
+        <div class="banner-text">
+          <strong>Complete seu perfil</strong>
+          <span>Para personalizar seu plano com IA</span>
+        </div>
+        <button onclick="showView('profile')" class="btn-sm">Completar</button>
+      </div>
+
+      <!-- Timer Jejum -->
+      <div class="card timer-card">
+        <div class="card-label">
+          <span class="dot fasting"></span>
+          <span id="phase-label">Janela Alimentar</span>
+        </div>
+        <div class="timer-ring-wrap">
+          <svg class="timer-ring" viewBox="0 0 220 220">
+            <circle class="ring-bg" cx="110" cy="110" r="96"/>
+            <circle id="ring-progress" class="ring-fill" cx="110" cy="110" r="96"
+              stroke-dasharray="603" stroke-dashoffset="603"/>
+          </svg>
+          <div class="timer-center">
+            <div id="time-display">00:00:00</div>
+            <p id="timer-status">Inicie seu jejum</p>
+          </div>
+        </div>
+        <div class="fasting-selector">
+          <label>Meta de Jejum:</label>
+          <select id="select-fast-goal">
+            <option value="12">12h (Iniciante)</option>
+            <option value="14">14h (Leve)</option>
+            <option value="16" selected>16h (Padrão)</option>
+            <option value="18">18h (Avançado)</option>
+            <option value="20">20h (Warrior)</option>
+            <option value="24">24h (OMAD)</option>
+          </select>
+        </div>
+        <button id="btn-toggle-fast" class="btn-primary btn-fasting">▶ Iniciar Jejum</button>
+      </div>
+
+      <!-- Calorias + Macros -->
+      <div class="card">
+        <div class="card-header">
+          <h3 class="card-title">Calorias do Dia</h3>
+          <span id="calories-text" class="card-value">0 / 1500 kcal</span>
+        </div>
+        <div class="progress-bar-wrap">
+          <div id="calories-bar" class="progress-bar-fill"></div>
+        </div>
+        <div class="macros-grid">
+          <div class="macro-col">
+            <span class="macro-name">Proteína</span>
+            <div class="macro-bar"><div id="bar-prot" class="macro-fill" style="background:#f87171;width:0%"></div></div>
+            <span id="val-prot" class="macro-val">0g</span>
+          </div>
+          <div class="macro-col">
+            <span class="macro-name">Carbo</span>
+            <div class="macro-bar"><div id="bar-carb" class="macro-fill" style="background:#60a5fa;width:0%"></div></div>
+            <span id="val-carb" class="macro-val">0g</span>
+          </div>
+          <div class="macro-col">
+            <span class="macro-name">Gordura</span>
+            <div class="macro-bar"><div id="bar-fat" class="macro-fill" style="background:#fbbf24;width:0%"></div></div>
+            <span id="val-fat" class="macro-val">0g</span>
+          </div>
+        </div>
+        <button class="btn-ghost btn-sm" id="btn-add-calories" style="margin-top:12px;width:100%">
+          + Registrar Alimento Manual
+        </button>
+        <div id="manual-entry-form" class="hidden" style="margin-top:12px;display:flex;gap:8px;flex-wrap:wrap;">
+          <input id="manual-food-name" placeholder="Nome do alimento" style="flex:1;min-width:120px;" />
+          <input id="manual-calories" type="number" placeholder="Kcal" style="width:80px;" />
+          <button class="btn-primary btn-sm" id="btn-save-manual">Salvar</button>
+        </div>
+      </div>
+
+      <!-- Água -->
+      <div class="card">
+        <div class="card-header">
+          <h3 class="card-title">💧 Hidratação</h3>
+          <span id="water-label" class="card-value">0 / 8 copos</span>
+        </div>
+        <div class="water-dots" id="water-dots">
+          <!-- gerado por JS -->
+        </div>
+      </div>
+
+    </section>
+
+    <!-- ── DIETA ── -->
+    <section id="view-meals" class="view hidden">
+      <div class="section-header">
+        <h2>Plano Semanal</h2>
+        <div class="day-pills" id="day-pills">
+          <button class="day-pill active" data-index="0">S</button>
+          <button class="day-pill" data-index="1">T</button>
+          <button class="day-pill" data-index="2">Q</button>
+          <button class="day-pill" data-index="3">Q</button>
+          <button class="day-pill" data-index="4">S</button>
+          <button class="day-pill" data-index="5">S</button>
+          <button class="day-pill" data-index="6">D</button>
+        </div>
+      </div>
+
+      <button id="btn-generate-ai" class="btn-primary btn-gradient">
+        ✨ Gerar Plano com IA
+      </button>
+
+      <div id="ai-loading" class="card hidden" style="text-align:center;padding:40px 20px;">
+        <div class="loader-spinner small" style="margin:0 auto 16px;"></div>
+        <p style="font-weight:700;">Criando seu plano personalizado…</p>
+        <span style="font-size:13px;color:var(--muted);">Isso pode levar ~15 segundos</span>
+      </div>
+
+      <div id="meals-container"></div>
+    </section>
+
+    <!-- ── TREINO ── -->
+    <section id="view-workouts" class="view hidden">
+      <h2 style="font-weight:800;margin-bottom:20px;">Treino de Hoje</h2>
+      <div id="workouts-container">
+        <div class="card empty-state">
+          <p>🏋️ Gere seu plano semanal na aba <strong>Dieta</strong> para ver seu treino aqui.</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- ── COMPRAS ── -->
+    <section id="view-shopping" class="view hidden">
+      <h2 style="font-weight:800;margin-bottom:20px;">Lista de Compras</h2>
+      <div class="card" style="gap:10px;display:flex;flex-direction:column;">
+        <div style="display:flex;gap:8px;">
+          <input id="new-shop-item" placeholder="Adicionar item…" style="flex:1;" />
+          <button id="btn-add-shop" class="btn-primary btn-sm">+</button>
+        </div>
+        <div id="shopping-container"></div>
+      </div>
+    </section>
+
+    <!-- ── PERFIL ── -->
+    <section id="view-profile" class="view hidden">
+      <h2 style="font-weight:800;margin-bottom:20px;">Meu Perfil</h2>
+      <div class="card">
+        <div class="profile-grid">
+          <div class="input-group">
+            <label>Idade</label>
+            <input id="prof-age" type="number" placeholder="30" />
+          </div>
+          <div class="input-group">
+            <label>Gênero</label>
+            <select id="prof-gender">
+              <option value="feminino">Feminino</option>
+              <option value="masculino">Masculino</option>
+            </select>
+          </div>
+          <div class="input-group">
+            <label>Peso atual (kg)</label>
+            <input id="prof-weight" type="number" placeholder="70" />
+          </div>
+          <div class="input-group">
+            <label>Altura (cm)</label>
+            <input id="prof-height" type="number" placeholder="165" />
+          </div>
+          <div class="input-group">
+            <label>Peso meta (kg)</label>
+            <input id="prof-goal" type="number" placeholder="60" />
+          </div>
+          <div class="input-group">
+            <label>Atividade</label>
+            <select id="prof-activity">
+              <option value="1.2">Sedentário</option>
+              <option value="1.375">Leve</option>
+              <option value="1.55">Moderado</option>
+              <option value="1.725">Ativo</option>
+            </select>
+          </div>
+          <div class="input-group" style="grid-column:1/-1;">
+            <label>Meta de Jejum (horas)</label>
+            <input id="prof-fasting-goal" type="number" placeholder="16" />
+          </div>
+        </div>
+        <button id="btn-save-profile" class="btn-primary" style="margin-top:16px;">Salvar Perfil</button>
+        <button id="btn-logout" class="btn-ghost btn-danger" style="margin-top:12px;width:100%;">Sair da conta</button>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- FAB CÂMERA -->
+  <button id="btn-fab" class="fab" title="Fotografar refeição">
+    <svg width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+      <path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/>
+      <circle cx="12" cy="13" r="4"/>
+    </svg>
+  </button>
+  <input type="file" id="photo-input" accept="image/*" capture="camera" style="display:none;" />
+
+  <!-- BOTTOM NAV -->
+  <nav class="bottom-nav">
+    <button class="nav-btn active" data-view="dashboard">
+      <svg width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/></svg>
+      <span>Painel</span>
+    </button>
+    <button class="nav-btn" data-view="meals">
+      <svg width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M18 8h1a4 4 0 0 1 0 8h-1"/><path d="M2 8h16v9a4 4 0 0 1-4 4H6a4 4 0 0 1-4-4V8z"/><line x1="6" y1="1" x2="6" y2="4"/><line x1="10" y1="1" x2="10" y2="4"/><line x1="14" y1="1" x2="14" y2="4"/></svg>
+      <span>Dieta</span>
+    </button>
+    <button class="nav-btn" data-view="workouts">
+      <svg width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M6.5 6.5h11"/><path d="M6.5 17.5h11"/><path d="M3 9.5h.5a2 2 0 0 1 2 2v1a2 2 0 0 1-2 2H3"/><path d="M21 9.5h-.5a2 2 0 0 0-2 2v1a2 2 0 0 0 2 2H21"/><rect x="6" y="4" width="2" height="16" rx="1"/><rect x="16" y="4" width="2" height="16" rx="1"/></svg>
+      <span>Treino</span>
+    </button>
+    <button class="nav-btn" data-view="shopping">
+      <svg width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/><path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"/></svg>
+      <span>Compras</span>
+    </button>
+    <button class="nav-btn" data-view="profile">
+      <svg width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+      <span>Perfil</span>
+    </button>
+  </nav>
+
+</div><!-- /screen-app -->
+
+<script src="app.js"></script>
+</body>
+</html>

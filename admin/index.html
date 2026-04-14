@@ -1,0 +1,578 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Habyto Admin</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+
+  <!-- Firebase Compat (não precisa de "type=module") -->
+  <script src="https://www.gstatic.com/firebasejs/10.9.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.9.0/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.9.0/firebase-firestore-compat.js"></script>
+
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    :root {
+      --green: #0f9d8a; --green-light: #e6faf8; --green-glow: rgba(15,157,138,.15);
+      --bg: #f0f4f3; --surface: #fff; --border: #e4eae8;
+      --text: #0d1b1e; --muted: #6b7f84; --red: #ef4444; --amber: #f59e0b;
+      --radius: 16px; --shadow: 0 2px 16px rgba(0,0,0,.07);
+    }
+    body { font-family: 'Outfit', sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; }
+    input, select, button { font-family: inherit; font-size: 15px; }
+
+    /* ── AUTH ── */
+    #auth-screen {
+      min-height: 100vh; display: flex; align-items: center; justify-content: center;
+      background: linear-gradient(135deg, #0d726a, #0f9d8a); padding: 24px;
+    }
+    .auth-box {
+      background: var(--surface); border-radius: 24px; padding: 40px 36px;
+      width: 100%; max-width: 420px; box-shadow: 0 20px 60px rgba(0,0,0,.18);
+    }
+    .auth-logo { display: flex; align-items: center; gap: 12px; margin-bottom: 28px; }
+    .auth-logomark {
+      width: 48px; height: 48px; background: var(--green); border-radius: 14px;
+      color: #fff; font-size: 24px; font-weight: 900;
+      display: flex; align-items: center; justify-content: center;
+    }
+    .auth-logo-text strong { display: block; font-size: 20px; font-weight: 800; }
+    .auth-logo-text span { font-size: 12px; color: var(--muted); font-weight: 600; }
+    .auth-box h2 { font-size: 22px; font-weight: 800; margin-bottom: 6px; }
+    .auth-box p  { font-size: 14px; color: var(--muted); margin-bottom: 24px; }
+    .field { margin-bottom: 14px; }
+    .field label { display: block; font-size: 12px; font-weight: 700; text-transform: uppercase; letter-spacing: .5px; color: var(--muted); margin-bottom: 6px; }
+    .field input { width: 100%; border: 2px solid var(--border); border-radius: 12px; padding: 14px 16px; outline: none; transition: border-color .2s; }
+    .field input:focus { border-color: var(--green); box-shadow: 0 0 0 4px var(--green-glow); }
+    #auth-error { display: none; color: var(--red); background: #fee2e2; border-radius: 10px; padding: 12px 14px; font-size: 13px; font-weight: 600; margin-bottom: 14px; }
+    .btn-login {
+      width: 100%; background: var(--green); color: #fff; border: none;
+      border-radius: 12px; padding: 16px; font-size: 16px; font-weight: 700;
+      cursor: pointer; transition: background .2s; box-shadow: 0 6px 20px rgba(15,157,138,.3);
+    }
+    .btn-login:hover { background: #0d8a7a; }
+    .btn-login:active { transform: scale(.98); }
+    .btn-login:disabled { opacity: .7; cursor: not-allowed; }
+
+    /* ── LAYOUT ── */
+    #app-screen { display: none; }
+    .layout { display: flex; min-height: 100vh; }
+    .sidebar {
+      width: 240px; background: var(--surface); border-right: 1px solid var(--border);
+      display: flex; flex-direction: column; padding: 24px 0;
+      position: fixed; top: 0; left: 0; height: 100vh; z-index: 100;
+    }
+    .sidebar-logo { display: flex; align-items: center; gap: 10px; padding: 0 20px 28px; border-bottom: 1px solid var(--border); margin-bottom: 12px; }
+    .s-mark { width: 36px; height: 36px; background: var(--green); border-radius: 10px; color: #fff; font-size: 18px; font-weight: 900; display: flex; align-items: center; justify-content: center; }
+    .s-name strong { display: block; font-size: 16px; font-weight: 800; }
+    .s-name span { font-size: 11px; color: var(--muted); }
+    .nav-link {
+      display: flex; align-items: center; gap: 12px; padding: 12px 20px;
+      font-size: 14px; font-weight: 600; color: var(--muted); cursor: pointer;
+      border-left: 3px solid transparent; transition: all .2s;
+    }
+    .nav-link:hover { color: var(--text); background: var(--bg); }
+    .nav-link.active { color: var(--green); background: var(--green-light); border-left-color: var(--green); }
+    .nav-icon { font-size: 18px; width: 24px; text-align: center; }
+    .sidebar-footer { margin-top: auto; padding: 16px; border-top: 1px solid var(--border); }
+    .admin-info { display: flex; align-items: center; gap: 10px; margin-bottom: 10px; }
+    .admin-avatar { width: 36px; height: 36px; background: var(--green); border-radius: 10px; color: #fff; font-weight: 800; display: flex; align-items: center; justify-content: center; font-size: 16px; flex-shrink: 0; }
+    .admin-info-text strong { display: block; font-size: 13px; font-weight: 700; }
+    .admin-info-text small { font-size: 11px; color: var(--muted); }
+    #btn-logout { width: 100%; background: #fee2e2; border: none; color: var(--red); border-radius: 10px; padding: 10px; font-weight: 700; font-size: 13px; cursor: pointer; }
+    #btn-logout:hover { background: #fecdd3; }
+
+    /* ── MAIN ── */
+    .main { margin-left: 240px; flex: 1; padding: 32px; }
+    .page { display: none; animation: fadeup .3s ease; }
+    .page.active { display: block; }
+    @keyframes fadeup { from { opacity:0; transform:translateY(8px); } to { opacity:1; transform:translateY(0); } }
+    .page-title { font-size: 26px; font-weight: 800; margin-bottom: 4px; }
+    .page-sub { font-size: 14px; color: var(--muted); margin-bottom: 28px; }
+
+    /* ── METRICS ── */
+    .metrics { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; margin-bottom: 28px; }
+    .metric { background: var(--surface); border-radius: var(--radius); padding: 22px; box-shadow: var(--shadow); }
+    .metric-icon { font-size: 26px; margin-bottom: 10px; }
+    .metric-label { font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: .5px; color: var(--muted); margin-bottom: 6px; }
+    .metric-value { font-size: 30px; font-weight: 800; letter-spacing: -1px; }
+    .metric-sub { font-size: 12px; color: var(--muted); margin-top: 4px; }
+
+    /* ── CARD TABLE ── */
+    .card { background: var(--surface); border-radius: var(--radius); box-shadow: var(--shadow); overflow: hidden; margin-bottom: 24px; }
+    .card-header { display: flex; align-items: center; justify-content: space-between; padding: 18px 24px; border-bottom: 1px solid var(--border); }
+    .card-header h3 { font-size: 16px; font-weight: 700; }
+    .search-box { border: 2px solid var(--border); border-radius: 10px; padding: 9px 14px; font-size: 14px; outline: none; width: 240px; transition: border-color .2s; }
+    .search-box:focus { border-color: var(--green); }
+    table { width: 100%; border-collapse: collapse; }
+    th { text-align: left; padding: 11px 20px; font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: .5px; color: var(--muted); background: var(--bg); border-bottom: 1px solid var(--border); }
+    td { padding: 13px 20px; border-bottom: 1px solid var(--border); font-size: 14px; vertical-align: middle; }
+    tr:last-child td { border-bottom: none; }
+    tr:hover td { background: #f8fbfa; }
+    .u-name { font-weight: 700; }
+    .u-email { font-size: 12px; color: var(--muted); }
+    .badge { display: inline-flex; align-items: center; padding: 4px 10px; border-radius: 99px; font-size: 12px; font-weight: 700; }
+    .badge-green  { background: var(--green-light); color: var(--green); }
+    .badge-amber  { background: #fef3c7; color: #b45309; }
+    .badge-gray   { background: var(--bg); color: var(--muted); }
+    .btn-detail { border: 2px solid var(--border); background: var(--surface); border-radius: 8px; padding: 6px 14px; font-size: 13px; font-weight: 600; cursor: pointer; transition: all .2s; }
+    .btn-detail:hover { border-color: var(--green); color: var(--green); }
+    .empty-row td { text-align: center; padding: 40px; color: var(--muted); font-size: 14px; }
+
+    /* ── MODAL ── */
+    #modal { position: fixed; inset: 0; background: rgba(0,0,0,.5); z-index: 999; display: none; align-items: center; justify-content: center; padding: 24px; }
+    #modal.open { display: flex; }
+    .modal-box { background: var(--surface); border-radius: 24px; padding: 32px; width: 100%; max-width: 500px; max-height: 90vh; overflow-y: auto; box-shadow: 0 24px 60px rgba(0,0,0,.2); animation: fadeup .25s; }
+    .modal-top { display: flex; align-items: center; justify-content: space-between; margin-bottom: 24px; }
+    .modal-top h3 { font-size: 20px; font-weight: 800; }
+    .btn-close { background: var(--bg); border: none; border-radius: 8px; width: 34px; height: 34px; font-size: 18px; cursor: pointer; }
+    .detail-row { display: flex; justify-content: space-between; align-items: center; padding: 11px 0; border-bottom: 1px solid var(--border); font-size: 14px; }
+    .detail-row:last-child { border-bottom: none; }
+    .detail-label { color: var(--muted); font-weight: 600; }
+    .detail-value { font-weight: 700; }
+
+    /* ── SETTINGS ── */
+    .settings-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+    .s-card { background: var(--surface); border-radius: var(--radius); padding: 24px; box-shadow: var(--shadow); }
+    .s-card h3 { font-size: 15px; font-weight: 700; margin-bottom: 4px; }
+    .s-card p { font-size: 13px; color: var(--muted); margin-bottom: 14px; }
+    .s-input { width: 100%; border: 2px solid var(--border); border-radius: 10px; padding: 12px 14px; font-size: 14px; outline: none; transition: border-color .2s; margin-bottom: 10px;}
+    .s-input:focus { border-color: var(--green); }
+    .btn-save { background: var(--green); color: #fff; border: none; border-radius: 10px; padding: 11px 20px; font-size: 14px; font-weight: 700; cursor: pointer; }
+    .btn-save:hover { background: #0d8a7a; }
+
+    /* ── TOAST ── */
+    #toast { position: fixed; bottom: 24px; right: 24px; background: rgba(13,27,30,.9); color: #fff; padding: 14px 20px; border-radius: 12px; font-size: 14px; font-weight: 600; display: none; z-index: 9999; animation: fadeup .3s; }
+
+    @media (max-width: 1000px) {
+      .metrics { grid-template-columns: repeat(2, 1fr); }
+      .sidebar { width: 64px; }
+      .sidebar .s-name, .sidebar .nav-link span:last-child, .sidebar .sidebar-footer { display: none; }
+      .main { margin-left: 64px; }
+      .settings-grid { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- AUTH -->
+<div id="auth-screen">
+  <div class="auth-box">
+    <div class="auth-logo">
+      <div class="auth-logomark">H</div>
+      <div class="auth-logo-text">
+        <strong>Habyto Admin</strong>
+        <span>Painel de Gerenciamento</span>
+      </div>
+    </div>
+    <h2>Acesso Restrito</h2>
+    <p>Entre com sua conta para gerenciar o aplicativo.</p>
+    <div class="field">
+      <label>Email</label>
+      <input type="email" id="f-email" placeholder="seu@email.com" autocomplete="email" />
+    </div>
+    <div class="field">
+      <label>Senha</label>
+      <input type="password" id="f-pass" placeholder="••••••••" />
+    </div>
+    <div id="auth-error"></div>
+    <button class="btn-login" id="btn-login">Entrar no Painel</button>
+  </div>
+</div>
+
+<!-- APP -->
+<div id="app-screen">
+  <div class="layout">
+
+    <aside class="sidebar">
+      <div class="sidebar-logo">
+        <div class="s-mark">H</div>
+        <div class="s-name">
+          <strong>Habyto</strong>
+          <span>Admin Panel</span>
+        </div>
+      </div>
+      <nav>
+        <div class="nav-link active" onclick="goPage('dashboard')">
+          <span class="nav-icon">📊</span><span>Dashboard</span>
+        </div>
+        <div class="nav-link" onclick="goPage('users')">
+          <span class="nav-icon">👥</span><span>Usuários</span>
+        </div>
+        <div class="nav-link" onclick="goPage('settings')">
+          <span class="nav-icon">⚙️</span><span>Configurações</span>
+        </div>
+      </nav>
+      <div class="sidebar-footer">
+        <div class="admin-info">
+          <div class="admin-avatar" id="admin-av">A</div>
+          <div class="admin-info-text">
+            <strong id="admin-name">Admin</strong>
+            <small id="admin-email">—</small>
+          </div>
+        </div>
+        <button id="btn-logout">Sair</button>
+      </div>
+    </aside>
+
+    <main class="main">
+
+      <!-- DASHBOARD -->
+      <div class="page active" id="page-dashboard">
+        <div class="page-title">Dashboard</div>
+        <div class="page-sub" id="last-update">Carregando…</div>
+
+        <div class="metrics">
+          <div class="metric">
+            <div class="metric-icon">👤</div>
+            <div class="metric-label">Total Usuários</div>
+            <div class="metric-value" id="m-total">—</div>
+            <div class="metric-sub">Cadastros no app</div>
+          </div>
+          <div class="metric">
+            <div class="metric-icon">✅</div>
+            <div class="metric-label">Perfis Completos</div>
+            <div class="metric-value" id="m-complete">—</div>
+            <div class="metric-sub">Com dados de saúde</div>
+          </div>
+          <div class="metric">
+            <div class="metric-icon">🔥</div>
+            <div class="metric-label">Em Jejum Agora</div>
+            <div class="metric-value" id="m-fasting">—</div>
+            <div class="metric-sub">Usuários ativos</div>
+          </div>
+          <div class="metric">
+            <div class="metric-icon">📋</div>
+            <div class="metric-label">Planos por IA</div>
+            <div class="metric-value" id="m-plans">—</div>
+            <div class="metric-sub">Planos semanais gerados</div>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="card-header">
+            <h3>Usuários Recentes</h3>
+            <span id="dash-time" style="font-size:13px;color:var(--muted)"></span>
+          </div>
+          <table>
+            <thead><tr><th>Usuário</th><th>Cadastro</th><th>Peso → Meta</th><th>Perfil</th></tr></thead>
+            <tbody id="recent-body"><tr class="empty-row"><td colspan="4">Carregando…</td></tr></tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- USERS -->
+      <div class="page" id="page-users">
+        <div class="page-title">Usuários</div>
+        <div class="page-sub">Gerencie todos os usuários cadastrados. (<span id="user-count">0</span> total)</div>
+        <div class="card">
+          <div class="card-header">
+            <h3>Todos os Usuários</h3>
+            <input class="search-box" id="search" placeholder="🔍 Buscar por email…" oninput="filterUsers(this.value)" />
+          </div>
+          <table>
+            <thead>
+              <tr>
+                <th>Usuário</th><th>Cadastro</th><th>Idade / Gênero</th>
+                <th>Peso → Meta</th><th>Jejum</th><th>Perfil</th><th></th>
+              </tr>
+            </thead>
+            <tbody id="users-body"><tr class="empty-row"><td colspan="7">Carregando…</td></tr></tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- SETTINGS -->
+      <div class="page" id="page-settings">
+        <div class="page-title">Configurações</div>
+        <div class="page-sub">Personalize o comportamento do Habyto.</div>
+        <div class="settings-grid">
+          <div class="s-card">
+            <h3>🔗 Link do Quiz</h3>
+            <p>URL para anúncios e campanhas.</p>
+            <input class="s-input" id="cfg-quiz" placeholder="https://habyto.vercel.app/quiz" />
+            <button class="btn-save" onclick="saveCfg('quiz_url','cfg-quiz')">Salvar</button>
+          </div>
+          <div class="s-card">
+            <h3>💳 Mercado Pago — Mensal</h3>
+            <p>Link de pagamento do plano mensal.</p>
+            <input class="s-input" id="cfg-mp-m" placeholder="https://www.mercadopago.com.br/…" />
+            <button class="btn-save" onclick="saveCfg('mp_mensal','cfg-mp-m')">Salvar</button>
+          </div>
+          <div class="s-card">
+            <h3>💳 Mercado Pago — Anual</h3>
+            <p>Link de pagamento do plano anual.</p>
+            <input class="s-input" id="cfg-mp-a" placeholder="https://www.mercadopago.com.br/…" />
+            <button class="btn-save" onclick="saveCfg('mp_anual','cfg-mp-a')">Salvar</button>
+          </div>
+          <div class="s-card">
+            <h3>⏱️ Jejum Padrão (horas)</h3>
+            <p>Sugestão para novos usuários.</p>
+            <input class="s-input" id="cfg-fasting" type="number" placeholder="16" />
+            <button class="btn-save" onclick="saveCfg('fasting_default','cfg-fasting')">Salvar</button>
+          </div>
+          <div class="s-card" style="grid-column:1/-1">
+            <h3>🏷️ Preços dos Planos</h3>
+            <p>Valores exibidos no funil de vendas.</p>
+            <div style="display:flex;gap:12px">
+              <div style="flex:1">
+                <label style="font-size:12px;font-weight:700;color:var(--muted);display:block;margin-bottom:6px">Mensal (R$)</label>
+                <input class="s-input" id="cfg-pm" type="number" placeholder="29.90" style="margin-bottom:0" />
+              </div>
+              <div style="flex:1">
+                <label style="font-size:12px;font-weight:700;color:var(--muted);display:block;margin-bottom:6px">Anual (R$)</label>
+                <input class="s-input" id="cfg-pa" type="number" placeholder="97.00" style="margin-bottom:0" />
+              </div>
+            </div>
+            <button class="btn-save" style="margin-top:12px" onclick="savePrices()">Salvar Preços</button>
+          </div>
+        </div>
+      </div>
+
+    </main>
+  </div>
+</div>
+
+<!-- MODAL -->
+<div id="modal">
+  <div class="modal-box">
+    <div class="modal-top">
+      <h3 id="modal-title">Detalhes</h3>
+      <button class="btn-close" onclick="closeModal()">✕</button>
+    </div>
+    <div id="modal-body"></div>
+  </div>
+</div>
+
+<!-- TOAST -->
+<div id="toast"></div>
+
+<script>
+// ── FIREBASE CONFIG ──────────────────────────────────────
+const firebaseConfig = {
+  apiKey: "AIzaSyCSbf0N5vYjqTTcLHAzHVja-VdPjKxvP_4",
+  authDomain: "app-jejum-emagrecimento.firebaseapp.com",
+  projectId: "app-jejum-emagrecimento",
+  storageBucket: "app-jejum-emagrecimento.firebasestorage.app",
+  messagingSenderId: "279209135099",
+  appId: "1:279209135099:web:675c01b0f6e680acc3195e",
+};
+firebase.initializeApp(firebaseConfig);
+const auth = firebase.auth();
+const db   = firebase.firestore();
+
+// ── UTILS ──────────────────────────────────────────────
+function toast(msg) {
+  const el = document.getElementById('toast');
+  el.textContent = msg; el.style.display = 'block';
+  setTimeout(() => el.style.display = 'none', 3000);
+}
+function fmt(ts) {
+  if (!ts) return '—';
+  try { return ts.toDate().toLocaleDateString('pt-BR'); } catch { return '—'; }
+}
+function badge(text, cls) { return `<span class="badge badge-${cls}">${text}</span>`; }
+function setEl(id, val) { const e = document.getElementById(id); if (e) e.textContent = val; }
+
+// ── AUTH ───────────────────────────────────────────────
+function showError(msg) {
+  const el = document.getElementById('auth-error');
+  el.textContent = msg; el.style.display = 'block';
+}
+
+async function doLogin() {
+  const email = document.getElementById('f-email').value.trim();
+  const pass  = document.getElementById('f-pass').value;
+  document.getElementById('auth-error').style.display = 'none';
+
+  if (!email || !pass) { showError('Preencha e-mail e senha.'); return; }
+
+  const btn = document.getElementById('btn-login');
+  btn.textContent = 'Entrando…'; btn.disabled = true;
+
+  try {
+    await auth.signInWithEmailAndPassword(email, pass);
+  } catch (e) {
+    const msgs = {
+      'auth/invalid-credential':    'E-mail ou senha incorretos.',
+      'auth/user-not-found':        'Usuário não encontrado.',
+      'auth/wrong-password':        'Senha incorreta.',
+      'auth/invalid-email':         'E-mail inválido.',
+      'auth/too-many-requests':     'Muitas tentativas. Aguarde.',
+      'auth/network-request-failed':'Sem conexão com internet.',
+      'auth/unauthorized-domain':   'Domínio não autorizado. Adicione habyto.vercel.app no Firebase.',
+    };
+    showError(msgs[e.code] || 'Erro: ' + e.code + ' – ' + e.message);
+    btn.textContent = 'Entrar no Painel'; btn.disabled = false;
+  }
+}
+
+document.getElementById('btn-login').addEventListener('click', doLogin);
+document.getElementById('f-pass').addEventListener('keydown', e => { if (e.key === 'Enter') doLogin(); });
+document.getElementById('f-email').addEventListener('keydown', e => { if (e.key === 'Enter') doLogin(); });
+document.getElementById('btn-logout').addEventListener('click', () => auth.signOut());
+
+// ── AUTH STATE ─────────────────────────────────────────
+auth.onAuthStateChanged(async (user) => {
+  if (user) {
+    document.getElementById('auth-screen').style.display = 'none';
+    document.getElementById('app-screen').style.display  = 'block';
+    const name = user.email.split('@')[0];
+    setEl('admin-name', name.charAt(0).toUpperCase() + name.slice(1));
+    setEl('admin-email', user.email);
+    const av = document.getElementById('admin-av');
+    if (av) av.textContent = name[0].toUpperCase();
+    await loadData();
+    loadSettings();
+  } else {
+    document.getElementById('auth-screen').style.display = 'flex';
+    document.getElementById('app-screen').style.display  = 'none';
+  }
+});
+
+// ── NAVIGATION ─────────────────────────────────────────
+function goPage(name) {
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.nav-link').forEach(l => l.classList.remove('active'));
+  document.getElementById('page-' + name).classList.add('active');
+  event.currentTarget.classList.add('active');
+}
+
+// ── LOAD DATA ──────────────────────────────────────────
+let allUsers = [];
+async function loadData() {
+  try {
+    const snap = await db.collection('users').orderBy('createdAt', 'desc').get();
+    allUsers = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+
+    const total    = allUsers.length;
+    const complete = allUsers.filter(u => u.age && u.height && u.weight && u.gender).length;
+    const fasting  = allUsers.filter(u => u.isFasting).length;
+    const plans    = allUsers.filter(u => u.lastGeneratedPlan).length;
+
+    setEl('m-total', total);
+    setEl('m-complete', complete);
+    setEl('m-fasting', fasting);
+    setEl('m-plans', plans);
+    setEl('user-count', total);
+
+    const now = new Date().toLocaleString('pt-BR');
+    setEl('last-update', 'Atualizado: ' + now);
+    setEl('dash-time', now);
+
+    renderRecent(allUsers.slice(0, 5));
+    renderUsers(allUsers);
+  } catch (e) {
+    console.error(e);
+    setEl('last-update', '⚠️ Erro ao carregar: ' + e.message);
+  }
+}
+
+// ── RECENT TABLE ───────────────────────────────────────
+function renderRecent(users) {
+  const tbody = document.getElementById('recent-body');
+  if (!users.length) { tbody.innerHTML = '<tr class="empty-row"><td colspan="4">Nenhum usuário ainda.</td></tr>'; return; }
+  tbody.innerHTML = users.map(u => {
+    const ok = !!(u.age && u.height && u.weight && u.gender);
+    return `<tr>
+      <td><div class="u-name">${(u.email||'').split('@')[0]}</div><div class="u-email">${u.email||'—'}</div></td>
+      <td>${fmt(u.createdAt)}</td>
+      <td>${u.weight||'—'}kg → ${u.goalWeight||'—'}kg</td>
+      <td>${ok ? badge('Completo','green') : badge('Incompleto','amber')}</td>
+    </tr>`;
+  }).join('');
+}
+
+// ── USERS TABLE ────────────────────────────────────────
+function renderUsers(users) {
+  const tbody = document.getElementById('users-body');
+  if (!users.length) { tbody.innerHTML = '<tr class="empty-row"><td colspan="7">Nenhum usuário encontrado.</td></tr>'; return; }
+  tbody.innerHTML = users.map(u => {
+    const ok = !!(u.age && u.height && u.weight && u.gender);
+    return `<tr>
+      <td><div class="u-name">${(u.email||'').split('@')[0]}</div><div class="u-email">${u.email||'—'}</div></td>
+      <td>${fmt(u.createdAt)}</td>
+      <td>${u.age||'—'} / ${u.gender||'—'}</td>
+      <td>${u.weight||'—'}kg → ${u.goalWeight||'—'}kg</td>
+      <td>${u.isFasting ? badge('🔥 Jejum','green') : badge('Alimentar','gray')}</td>
+      <td>${ok ? badge('Completo','green') : badge('Incompleto','amber')}</td>
+      <td><button class="btn-detail" onclick="openModal('${u.id}')">Detalhes</button></td>
+    </tr>`;
+  }).join('');
+}
+
+function filterUsers(q) {
+  const f = q.toLowerCase();
+  const list = f ? allUsers.filter(u => (u.email||'').toLowerCase().includes(f)) : allUsers;
+  renderUsers(list);
+  setEl('user-count', list.length);
+}
+
+// ── MODAL ──────────────────────────────────────────────
+async function openModal(uid) {
+  const modal = document.getElementById('modal');
+  const body  = document.getElementById('modal-body');
+  body.innerHTML = '<div style="text-align:center;padding:30px;">Carregando…</div>';
+  modal.classList.add('open');
+  try {
+    const snap = await db.collection('users').doc(uid).get();
+    if (!snap.exists) { body.innerHTML = '<p>Não encontrado.</p>'; return; }
+    const u = snap.data();
+    setEl('modal-title', (u.email||uid).split('@')[0]);
+    const rows = [
+      ['E-mail', u.email], ['Cadastro', fmt(u.createdAt)],
+      ['Idade', u.age ? u.age + ' anos' : '—'], ['Gênero', u.gender||'—'],
+      ['Altura', u.height ? u.height + ' cm' : '—'],
+      ['Peso atual', u.weight ? u.weight + ' kg' : '—'],
+      ['Peso meta', u.goalWeight ? u.goalWeight + ' kg' : '—'],
+      ['Atividade', u.activityLevel||'—'],
+      ['Jejum padrão', (u.fastingGoal||16) + 'h'],
+      ['Em jejum agora', u.isFasting ? '✅ Sim' : '❌ Não'],
+      ['Água hoje', (u.waterGlasses||0) + ' copos'],
+      ['Calorias hoje', (u.dailyCalories||0) + ' kcal'],
+      ['Streak', (u.streakCount||0) + ' dias 🔥'],
+      ['Plano gerado', u.lastGeneratedPlan ? '✅ Sim' : '❌ Não'],
+    ];
+    body.innerHTML = rows.map(([l,v]) =>
+      `<div class="detail-row"><span class="detail-label">${l}</span><span class="detail-value">${v||'—'}</span></div>`
+    ).join('');
+  } catch(e) { body.innerHTML = '<p style="color:red">Erro: ' + e.message + '</p>'; }
+}
+
+function closeModal() { document.getElementById('modal').classList.remove('open'); }
+document.getElementById('modal').addEventListener('click', e => { if (e.target === e.currentTarget) closeModal(); });
+
+// ── SETTINGS ───────────────────────────────────────────
+async function loadSettings() {
+  try {
+    const snap = await db.collection('config').doc('global').get();
+    if (!snap.exists) return;
+    const d = snap.data();
+    const fill = (id, val) => { const el = document.getElementById(id); if (el && val != null) el.value = val; };
+    fill('cfg-quiz', d.quiz_url); fill('cfg-mp-m', d.mp_mensal);
+    fill('cfg-mp-a', d.mp_anual); fill('cfg-fasting', d.fasting_default);
+    fill('cfg-pm', d.price_mensal); fill('cfg-pa', d.price_anual);
+  } catch(e) { console.warn('Settings:', e.message); }
+}
+
+async function saveCfg(key, inputId) {
+  const val = document.getElementById(inputId)?.value;
+  try {
+    await db.collection('config').doc('global').set({ [key]: val }, { merge: true });
+    toast('✅ Salvo com sucesso!');
+  } catch(e) { toast('❌ Erro: ' + e.message); }
+}
+
+async function savePrices() {
+  const pm = document.getElementById('cfg-pm')?.value;
+  const pa = document.getElementById('cfg-pa')?.value;
+  try {
+    await db.collection('config').doc('global').set({ price_mensal: pm, price_anual: pa }, { merge: true });
+    toast('✅ Preços salvos!');
+  } catch(e) { toast('❌ Erro: ' + e.message); }
+}
+</script>
+</body>
+</html>

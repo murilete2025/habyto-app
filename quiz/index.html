@@ -1,0 +1,920 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Habyto - Jejum Intermitente Personalizado</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;600;700;800;900&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="style.css?v=1.2" />
+</head>
+<body>
+
+<!-- ===== SPLASH (Step 0 - Landing) ===== -->
+<div class="screen active" id="screen-0">
+  <header class="header-simple">
+    <div class="logo-box">
+      <span class="logo-icon" style="background:#1a9e8e; color:white; border-radius:8px; padding:0 8px; font-weight:800;">H</span>
+      <span class="logo-text">Habyto</span>
+    </div>
+    <div class="header-right">
+      <span class="help-link">? Ajuda</span>
+    </div>
+  </header>
+  <div class="screen-content center-content">
+    <h1 class="splash-title">JEJUM INTERMITENTE</h1>
+    <p class="splash-subtitle">De acordo com a sua faixa etária</p>
+    <div class="age-cards">
+      <div class="age-card" onclick="selectAge('18-29')">
+        <img class="age-card-img" src="assets/age-18-29.png" alt="18 a 29 anos" />
+        <div class="age-card-label">18–29 <span class="arrow">›</span></div>
+      </div>
+      <div class="age-card" onclick="selectAge('30-39')">
+        <img class="age-card-img" src="assets/age-30-39.png" alt="30 a 39 anos" />
+        <div class="age-card-label">30–39 <span class="arrow">›</span></div>
+      </div>
+      <div class="age-card" onclick="selectAge('40-49')">
+        <img class="age-card-img" src="assets/age-40-49.png" alt="40 a 49 anos" />
+        <div class="age-card-label">40–49 <span class="arrow">›</span></div>
+      </div>
+      <div class="age-card" onclick="selectAge('50+')">
+        <img class="age-card-img" src="assets/age-50-plus.png" alt="50+ anos" />
+        <div class="age-card-label">50+ <span class="arrow">›</span></div>
+      </div>
+    </div>
+    <p class="legal-text">Ao continuar, você concorda com nossos <a href="#">Termos de Serviço</a> e <a href="#">Política de Privacidade</a>.</p>
+  </div>
+</div>
+
+<!-- ===== SOCIAL PROOF (Step 1) ===== -->
+<div class="screen" id="screen-1">
+  <header class="header-centered">
+    <div class="logo-box">
+      <span class="logo-icon" style="background:#1a9e8e; color:white; border-radius:8px; padding:0 8px; font-weight:800;">H</span>
+      <span class="logo-text">Habyto</span>
+    </div>
+  </header>
+  <div class="screen-content center-content">
+    <h2 class="section-title">Você está em boas mãos</h2>
+    <p class="section-subtitle">29.567.899+ usuários confiam em nós para alcançar resultados reais</p>
+    <div class="world-map-container">
+      <svg class="world-map-svg" viewBox="0 0 800 400" xmlns="http://www.w3.org/2000/svg" opacity="0.12">
+        <ellipse cx="400" cy="200" rx="380" ry="190" fill="#1a9e8e"/>
+        <path d="M200,120 Q280,80 360,130 Q420,160 480,110 Q560,70 620,140 Q680,190 640,240 Q600,290 520,260 Q440,230 380,270 Q300,310 240,280 Q160,250 140,190 Q130,150 200,120Z" fill="#0d7a6e"/>
+        <path d="M80,200 Q120,160 160,200 Q180,230 140,250 Q100,260 80,230 Q70,215 80,200Z" fill="#0d7a6e"/>
+        <path d="M680,160 Q720,140 740,180 Q750,210 720,230 Q690,240 670,210 Q660,185 680,160Z" fill="#0d7a6e"/>
+      </svg>
+      <img class="avatar-bubble a1" src="https://i.pravatar.cc/80?img=11" alt="" />
+      <img class="avatar-bubble a2" src="https://i.pravatar.cc/80?img=32" alt="" />
+      <img class="avatar-bubble a3" src="https://i.pravatar.cc/80?img=47" alt="" />
+      <img class="avatar-bubble a4" src="https://i.pravatar.cc/80?img=25" alt="" />
+      <div class="checkmark-badge">✔</div>
+    </div>
+    <button class="btn-primary btn-wide" onclick="nextScreen()">Próximo passo</button>
+  </div>
+</div>
+
+<!-- ===== GENDER (Step 2) ===== -->
+<div class="screen" id="screen-2">
+  <header class="header-progress">
+    <button class="back-btn" onclick="prevScreen()">‹</button>
+    <div class="logo-box">
+      <span class="logo-icon" style="background:#1a9e8e; color:white; border-radius:8px; padding:0 8px; font-weight:800;">H</span>
+      <span class="logo-text">Habyto</span>
+    </div>
+    <span class="step-counter" id="counter-2">2/37</span>
+  </header>
+  <div class="progress-bar-wrap"><div class="progress-bar" style="width:5%"></div></div>
+  <div class="screen-content">
+    <h2 class="section-title">Selecione seu gênero</h2>
+    <div class="option-list">
+      <div class="option-item" onclick="pickOption(this,'gender','Masculino')">
+        <span class="option-icon">♂</span> <span>Masculino</span>
+      </div>
+      <div class="option-item" onclick="pickOption(this,'gender','Feminino')">
+        <span class="option-icon">♀</span> <span>Feminino</span>
+      </div>
+    </div>
+    <p class="info-hint">ℹ Pedimos isso para personalizar seu plano com base nas respostas biológicas ao jejum</p>
+  </div>
+</div>
+
+<!-- ===== MOTIVATIONAL (Step 3) ===== -->
+<div class="screen" id="screen-3">
+  <header class="header-centered">
+    <div class="logo-box">
+      <span class="logo-icon" style="background:#1a9e8e; color:white; border-radius:8px; padding:0 8px; font-weight:800;">H</span>
+      <span class="logo-text">Habyto</span>
+    </div>
+  </header>
+  <div class="screen-content center-content">
+    <div class="motive-image">
+      <img id="motive-img-1" src="https://images.unsplash.com/photo-1506126613408-eca07ce68773?w=600&q=80" alt="Meditação" class="motive-real-img" />
+    </div>
+    <h2 class="motive-title">Um plano de jejum personalizado é a resposta!</h2>
+    <p class="motive-body">Para <strong id="motive-gender-text">mulheres</strong>, o jejum é a solução vencedora para tonificar o corpo. É um ponto de partida simples que não requer grandes mudanças ou sacrifícios.</p>
+    <button class="btn-primary btn-wide" onclick="nextScreen()">Continuar</button>
+  </div>
+</div>
+
+<!-- ===== ADDITIONAL GOAL (Step 4) ===== -->
+<div class="screen" id="screen-4">
+  <header class="header-progress">
+    <button class="back-btn" onclick="prevScreen()">‹</button>
+    <div class="logo-box">
+      <span class="logo-icon" style="background:#1a9e8e; color:white; border-radius:8px; padding:0 8px; font-weight:800;">H</span>
+      <span class="logo-text">Habyto</span>
+    </div>
+    <span class="step-counter">5/37</span>
+  </header>
+  <div class="progress-bar-wrap"><div class="progress-bar" style="width:13%"></div></div>
+  <div class="screen-content">
+    <h2 class="section-title">Escolha um objetivo adicional</h2>
+    <p class="section-subtitle">Você pode escolher várias opções</p>
+    <div class="toggle-row">
+      <label class="toggle-switch">
+        <input type="checkbox" id="selectAllGoals" onchange="toggleSelectAll('goals')">
+        <span class="slider"></span>
+      </label>
+      <span>Selecionar todos</span>
+    </div>
+    <div class="option-list multi" id="goals">
+      <div class="option-item multi-opt" onclick="toggleMulti(this)">
+        <span class="option-icon">⚡</span> <span>Aumentar energia</span>
+      </div>
+      <div class="option-item multi-opt" onclick="toggleMulti(this)">
+        <span class="option-icon">🌙</span> <span>Melhorar sono</span>
+      </div>
+      <div class="option-item multi-opt" onclick="toggleMulti(this)">
+        <span class="option-icon">🧘</span> <span>Reduzir estresse</span>
+      </div>
+      <div class="option-item multi-opt" onclick="toggleMulti(this)">
+        <span class="option-icon">❤️</span> <span>Melhorar saúde</span>
+      </div>
+      <div class="option-item multi-opt" onclick="toggleMulti(this)">
+        <span class="option-icon">🔥</span> <span>Acelerar metabolismo</span>
+      </div>
+    </div>
+    <button class="btn-primary btn-wide btn-bottom" onclick="nextScreen()">Continuar</button>
+  </div>
+</div>
+
+<!-- ===== STARTING POINT (Step 5) ===== -->
+<div class="screen" id="screen-5">
+  <header class="header-progress">
+    <button class="back-btn" onclick="prevScreen()">‹</button>
+    <div class="logo-box">
+      <span class="logo-icon" style="background:#1a9e8e; color:white; border-radius:8px; padding:0 8px; font-weight:800;">H</span>
+      <span class="logo-text">Habyto</span>
+    </div>
+    <span class="step-counter">6/37</span>
+  </header>
+  <div class="progress-bar-wrap"><div class="progress-bar" style="width:16%"></div></div>
+  <div class="screen-content">
+    <h2 class="section-title">Qual é seu ponto de partida?</h2>
+    <div class="option-list">
+      <div class="option-item with-tag" onclick="pickOption(this,'start','Magro(a)')">
+        <span>Magro(a)</span><span class="tag-badge">Abaixo do peso</span>
+      </div>
+      <div class="option-item with-tag" onclick="pickOption(this,'start','Magro-gordo')">
+        <span>Magro-gordo</span><span class="tag-badge">Pouco músculo</span>
+      </div>
+      <div class="option-item with-tag" onclick="pickOption(this,'start','Forte')">
+        <span>Forte</span><span class="tag-badge">Peso normal</span>
+      </div>
+      <div class="option-item with-tag" onclick="pickOption(this,'start','Acima do peso')">
+        <span>Acima do peso</span><span class="tag-badge">Excesso de gordura</span>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ===== DREAM BODY (Step 6) ===== -->
+<div class="screen" id="screen-6">
+  <header class="header-progress">
+    <button class="back-btn" onclick="prevScreen()">‹</button>
+    <div class="logo-box">
+      <span class="logo-icon" style="background:#1a9e8e; color:white; border-radius:8px; padding:0 8px; font-weight:800;">H</span>
+      <span class="logo-text">Habyto</span>
+    </div>
+    <span class="step-counter">7/37</span>
+  </header>
+  <div class="progress-bar-wrap"><div class="progress-bar" style="width:19%"></div></div>
+  <div class="screen-content">
+    <h2 class="section-title">Qual é o seu corpo dos sonhos?</h2>
+    <div class="option-list img-options">
+      <div class="option-item img-opt" onclick="pickOption(this,'dream','Curvilíneo')">
+        <span>Curvilíneo</span>
+        <img class="body-img-real" src="https://images.unsplash.com/photo-1605296867304-46d5465a13f1?w=120&h=160&fit=crop&q=80" alt="Curvilíneo" />
+      </div>
+      <div class="option-item img-opt" onclick="pickOption(this,'dream','Fino')">
+        <span>Fino</span>
+        <img class="body-img-real" src="assets/body-thin.png" alt="Fino" />
+      </div>
+      <div class="option-item img-opt" onclick="pickOption(this,'dream','Em forma')">
+        <span>Em forma</span>
+        <img class="body-img-real" src="https://images.unsplash.com/photo-1517960413843-0aee8e2b3285?w=120&h=160&fit=crop&q=80" alt="Em forma" />
+      </div>
+      <div class="option-item img-opt" onclick="pickOption(this,'dream','Definido')">
+        <span>Definido</span>
+        <img class="body-img-real" src="https://images.unsplash.com/photo-1571019613454-1cb2f99b2d8b?w=120&h=160&fit=crop&q=80" alt="Definido" />
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ===== CONCERN AREAS (Step 7) ===== -->
+<div class="screen" id="screen-7">
+  <header class="header-progress">
+    <button class="back-btn" onclick="prevScreen()">‹</button>
+    <div class="logo-box">
+      <span class="logo-icon" style="background:#1a9e8e; color:white; border-radius:8px; padding:0 8px; font-weight:800;">H</span>
+      <span class="logo-text">Habyto</span>
+    </div>
+    <span class="step-counter">8/37</span>
+  </header>
+  <div class="progress-bar-wrap"><div class="progress-bar" style="width:22%"></div></div>
+  <div class="screen-content">
+    <h2 class="section-title">Quais áreas te preocupam mais?</h2>
+    <p class="section-subtitle">Você pode escolher várias opções</p>
+    <div class="option-list multi" id="areas">
+      <div class="option-item multi-opt" onclick="toggleMulti(this)">🫃 Gordura abdominal</div>
+      <div class="option-item multi-opt" onclick="toggleMulti(this)">💪 Braços flácidos</div>
+      <div class="option-item multi-opt" onclick="toggleMulti(this)">🦵 Pernas</div>
+      <div class="option-item multi-opt" onclick="toggleMulti(this)">🍑 Quadril / nádegas</div>
+      <div class="option-item multi-opt" onclick="toggleMulti(this)">😤 Papada</div>
+      <div class="option-item multi-opt" onclick="toggleMulti(this)">🔙 Costas</div>
+    </div>
+    <button class="btn-primary btn-wide btn-bottom" onclick="nextScreen()">Continuar</button>
+  </div>
+</div>
+
+<!-- ===== BEST SHAPE (Step 8) ===== -->
+<div class="screen" id="screen-8">
+  <header class="header-progress">
+    <button class="back-btn" onclick="prevScreen()">‹</button>
+    <div class="logo-box">
+      <span class="logo-icon" style="background:#1a9e8e; color:white; border-radius:8px; padding:0 8px; font-weight:800;">H</span>
+      <span class="logo-text">Habyto</span>
+    </div>
+    <span class="step-counter">9/37</span>
+  </header>
+  <div class="progress-bar-wrap"><div class="progress-bar" style="width:24%"></div></div>
+  <div class="screen-content">
+    <h2 class="section-title">Há quanto tempo você estava na melhor forma da sua vida?</h2>
+    <div class="option-list">
+      <div class="option-item" onclick="pickOption(this,'bestshape','Agora mesmo')">Agora mesmo</div>
+      <div class="option-item" onclick="pickOption(this,'bestshape','1-2 anos atrás')">1–2 anos atrás</div>
+      <div class="option-item" onclick="pickOption(this,'bestshape','3-5 anos atrás')">3–5 anos atrás</div>
+      <div class="option-item" onclick="pickOption(this,'bestshape','Mais de 5 anos')">Mais de 5 anos</div>
+      <div class="option-item" onclick="pickOption(this,'bestshape','Nunca estive')">Nunca estive</div>
+    </div>
+  </div>
+</div>
+
+<!-- ===== FASTING KNOWLEDGE (Step 9) ===== -->
+<div class="screen" id="screen-9">
+  <header class="header-progress">
+    <button class="back-btn" onclick="prevScreen()">‹</button>
+    <div class="logo-box">
+      <span class="logo-icon" style="background:#1a9e8e; color:white; border-radius:8px; padding:0 8px; font-weight:800;">H</span>
+      <span class="logo-text">Habyto</span>
+    </div>
+    <span class="step-counter">10/37</span>
+  </header>
+  <div class="progress-bar-wrap"><div class="progress-bar" style="width:27%"></div></div>
+  <div class="screen-content">
+    <h2 class="section-title">O que você sabe sobre jejum intermitente?</h2>
+    <div class="option-list">
+      <div class="option-item" onclick="pickOption(this,'knowledge','Nada')">😶 Nada ainda</div>
+      <div class="option-item" onclick="pickOption(this,'knowledge','Pouco')">🤔 Já ouvi falar</div>
+      <div class="option-item" onclick="pickOption(this,'knowledge','Experiente')">💡 Tenho experiência</div>
+    </div>
+  </div>
+</div>
+
+<!-- ===== FASTING BENEFITS (Step 10) ===== -->
+<div class="screen" id="screen-10">
+  <header class="header-centered">
+    <div class="logo-box">
+      <span class="logo-icon" style="background:#1a9e8e; color:white; border-radius:8px; padding:0 8px; font-weight:800;">H</span>
+      <span class="logo-text">Habyto</span>
+    </div>
+  </header>
+  <div class="screen-content center-content">
+    <h2 class="motive-title">Benefícios do Jejum Intermitente</h2>
+    <div class="benefits-grid">
+      <div class="benefit-card">
+        <div class="benefit-icon">😴</div>
+        <h3>Melhora o Sono</h3>
+        <p>Regular o jejum ajuda a equilibrar hormônios que melhoram a qualidade do sono.</p>
+      </div>
+      <div class="benefit-card">
+        <div class="benefit-icon">⚡</div>
+        <h3>Acelera Metabolismo</h3>
+        <p>O jejum ativa a autofagia e acelera a queima de gordura naturalmente.</p>
+      </div>
+      <div class="benefit-card">
+        <div class="benefit-icon">❤️</div>
+        <h3>Melhora a Saúde</h3>
+        <p>Reduz inflamação, melhora sensibilidade à insulina e protege o coração.</p>
+      </div>
+    </div>
+    <button class="btn-primary btn-wide" onclick="nextScreen()">Continuar</button>
+  </div>
+</div>
+
+<!-- ===== DAILY ROUTINE (Step 11) ===== -->
+<div class="screen" id="screen-11">
+  <header class="header-progress">
+    <button class="back-btn" onclick="prevScreen()">‹</button>
+    <div class="logo-box">
+      <span class="logo-icon" style="background:#1a9e8e; color:white; border-radius:8px; padding:0 8px; font-weight:800;">H</span>
+      <span class="logo-text">Habyto</span>
+    </div>
+    <span class="step-counter">12/37</span>
+  </header>
+  <div class="progress-bar-wrap"><div class="progress-bar" style="width:32%"></div></div>
+  <div class="screen-content">
+    <h2 class="section-title">Como você descreveria seu dia típico?</h2>
+    <div class="option-list">
+      <div class="option-item" onclick="pickOption(this,'routine','Calmo')">😌 Calmo e tranquilo</div>
+      <div class="option-item" onclick="pickOption(this,'routine','Casa')">🏠 Casa e crianças</div>
+      <div class="option-item" onclick="pickOption(this,'routine','Ativo')">⚡ Ativo e social</div>
+    </div>
+  </div>
+</div>
+
+<!-- ===== FIRST MEAL (Step 12) ===== -->
+<div class="screen" id="screen-12">
+  <header class="header-progress">
+    <button class="back-btn" onclick="prevScreen()">‹</button>
+    <div class="logo-box">
+      <span class="logo-icon" style="background:#1a9e8e; color:white; border-radius:8px; padding:0 8px; font-weight:800;">H</span>
+      <span class="logo-text">Habyto</span>
+    </div>
+    <span class="step-counter">13/37</span>
+  </header>
+  <div class="progress-bar-wrap"><div class="progress-bar" style="width:35%"></div></div>
+  <div class="screen-content">
+    <h2 class="section-title">Quando você costuma fazer sua primeira refeição?</h2>
+    <div class="option-list">
+      <div class="option-item" onclick="pickOption(this,'firstmeal','6-8h')">🌅 6h – 8h</div>
+      <div class="option-item" onclick="pickOption(this,'firstmeal','8-10h')">☀️ 8h – 10h</div>
+      <div class="option-item" onclick="pickOption(this,'firstmeal','10-12h')">🌤️ 10h – 12h</div>
+      <div class="option-item" onclick="pickOption(this,'firstmeal','pulo')">⏭️ Pulo o café da manhã</div>
+    </div>
+  </div>
+</div>
+
+<!-- ===== MEAL COUNT (Step 13) ===== -->
+<div class="screen" id="screen-13">
+  <header class="header-progress">
+    <button class="back-btn" onclick="prevScreen()">‹</button>
+    <div class="logo-box">
+      <span class="logo-icon" style="background:#1a9e8e; color:white; border-radius:8px; padding:0 8px; font-weight:800;">H</span>
+      <span class="logo-text">Habyto</span>
+    </div>
+    <span class="step-counter">15/37</span>
+  </header>
+  <div class="progress-bar-wrap"><div class="progress-bar" style="width:40%"></div></div>
+  <div class="screen-content">
+    <h2 class="section-title">Quantas refeições por dia você deseja fazer?</h2>
+    <div class="option-list">
+      <div class="option-item" onclick="pickOption(this,'meals','2')">2 refeições</div>
+      <div class="option-item" onclick="pickOption(this,'meals','3')">3 refeições</div>
+      <div class="option-item" onclick="pickOption(this,'meals','4')">4 refeições</div>
+      <div class="option-item" onclick="pickOption(this,'meals','5')">5 refeições</div>
+    </div>
+  </div>
+</div>
+
+<!-- ===== MEAL PLAN TYPE (Step 14) ===== -->
+<div class="screen" id="screen-14">
+  <header class="header-progress">
+    <button class="back-btn" onclick="prevScreen()">‹</button>
+    <div class="logo-box">
+      <span class="logo-icon" style="background:#1a9e8e; color:white; border-radius:8px; padding:0 8px; font-weight:800;">H</span>
+      <span class="logo-text">Habyto</span>
+    </div>
+    <span class="step-counter">16/37</span>
+  </header>
+  <div class="progress-bar-wrap"><div class="progress-bar" style="width:43%"></div></div>
+  <div class="screen-content">
+    <h2 class="section-title">Qual tipo de cardápio você prefere?</h2>
+    <div class="option-list">
+      <div class="option-item" onclick="pickOption(this,'mealtype','Tradicional')">🍽️ Tradicional</div>
+      <div class="option-item" onclick="pickOption(this,'mealtype','Keto')">🥑 Keto</div>
+      <div class="option-item" onclick="pickOption(this,'mealtype','Vegetariano')">🥗 Vegetariano</div>
+      <div class="option-item" onclick="pickOption(this,'mealtype','Plant-based')">🌱 Plant-based</div>
+      <div class="option-item" onclick="pickOption(this,'mealtype','Mediterrâneo')">🫒 Mediterrâneo</div>
+    </div>
+  </div>
+</div>
+
+<!-- ===== FOOD PREFERENCES (Step 15) ===== -->
+<div class="screen" id="screen-15">
+  <header class="header-progress">
+    <button class="back-btn" onclick="prevScreen()">‹</button>
+    <div class="logo-box">
+      <span class="logo-icon" style="background:#1a9e8e; color:white; border-radius:8px; padding:0 8px; font-weight:800;">H</span>
+      <span class="logo-text">Habyto</span>
+    </div>
+    <span class="step-counter">17/37</span>
+  </header>
+  <div class="progress-bar-wrap"><div class="progress-bar" style="width:46%"></div></div>
+  <div class="screen-content">
+    <h2 class="section-title">Quais são suas preferências alimentares?</h2>
+    <p class="section-subtitle">Você pode selecionar vários</p>
+    <div class="food-tags" id="foodtags">
+      <span class="food-tag" onclick="toggleTag(this)">🥩 Carne vermelha</span>
+      <span class="food-tag" onclick="toggleTag(this)">🍗 Frango</span>
+      <span class="food-tag" onclick="toggleTag(this)">🐟 Peixe</span>
+      <span class="food-tag" onclick="toggleTag(this)">🥚 Ovos</span>
+      <span class="food-tag" onclick="toggleTag(this)">🧀 Laticínios</span>
+      <span class="food-tag" onclick="toggleTag(this)">🥦 Brócolis</span>
+      <span class="food-tag" onclick="toggleTag(this)">🥑 Abacate</span>
+      <span class="food-tag" onclick="toggleTag(this)">🍎 Frutas</span>
+      <span class="food-tag" onclick="toggleTag(this)">🌾 Grãos</span>
+      <span class="food-tag" onclick="toggleTag(this)">🥜 Oleaginosas</span>
+      <span class="food-tag" onclick="toggleTag(this)">🍫 Chocolate amargo</span>
+      <span class="food-tag" onclick="toggleTag(this)">🍵 Chá</span>
+      <span class="food-tag" onclick="toggleTag(this)">☕ Café</span>
+      <span class="food-tag" onclick="toggleTag(this)">🫘 Feijão / Leguminosas</span>
+      <span class="food-tag" onclick="toggleTag(this)">🍚 Arroz</span>
+      <span class="food-tag" onclick="toggleTag(this)">🥔 Batata</span>
+    </div>
+    <button class="btn-primary btn-wide btn-bottom" onclick="nextScreen()">Continuar</button>
+  </div>
+</div>
+
+<!-- ===== WATER INTAKE (Step 16) ===== -->
+<div class="screen" id="screen-16">
+  <header class="header-progress">
+    <button class="back-btn" onclick="prevScreen()">‹</button>
+    <div class="logo-box">
+      <span class="logo-icon" style="background:#1a9e8e; color:white; border-radius:8px; padding:0 8px; font-weight:800;">H</span>
+      <span class="logo-text">Habyto</span>
+    </div>
+    <span class="step-counter">20/37</span>
+  </header>
+  <div class="progress-bar-wrap"><div class="progress-bar" style="width:54%"></div></div>
+  <div class="screen-content">
+    <h2 class="section-title">Quanto de água você bebe por dia?</h2>
+    <div class="option-list">
+      <div class="option-item" onclick="pickOption(this,'water','<0.5L')">💧 Menos de 0,5L</div>
+      <div class="option-item" onclick="pickOption(this,'water','0.5-1.5L')">💧💧 0,5L – 1,5L</div>
+      <div class="option-item" onclick="pickOption(this,'water','1.5-2.5L')">💦 1,5L – 2,5L</div>
+      <div class="option-item" onclick="pickOption(this,'water','>2.5L')">💦💦 Mais de 2,5L</div>
+    </div>
+  </div>
+</div>
+
+<!-- ===== FATIGUE (Step 17) ===== -->
+<div class="screen" id="screen-17">
+  <header class="header-progress">
+    <button class="back-btn" onclick="prevScreen()">‹</button>
+    <div class="logo-box">
+      <span class="logo-icon" style="background:#1a9e8e; color:white; border-radius:8px; padding:0 8px; font-weight:800;">H</span>
+      <span class="logo-text">Habyto</span>
+    </div>
+    <span class="step-counter">21/37</span>
+  </header>
+  <div class="progress-bar-wrap"><div class="progress-bar" style="width:57%"></div></div>
+  <div class="screen-content">
+    <h2 class="section-title">O quanto cansada você costuma se sentir durante o dia?</h2>
+    <div class="option-list">
+      <div class="option-item" onclick="pickOption(this,'fatigue','sempre')">😴 Cansada na maior parte do tempo</div>
+      <div class="option-item" onclick="pickOption(this,'fatigue','manha')">☀️ Bem pela manhã, cansada à tarde</div>
+      <div class="option-item" onclick="pickOption(this,'fatigue','tarde')">🌆 Animada à tarde, cansada à noite</div>
+      <div class="option-item" onclick="pickOption(this,'fatigue','nunca')">⚡ Raramente me sinto cansada</div>
+    </div>
+  </div>
+</div>
+
+<!-- ===== COOKING (Step 18) ===== -->
+<div class="screen" id="screen-18">
+  <header class="header-progress">
+    <button class="back-btn" onclick="prevScreen()">‹</button>
+    <div class="logo-box">
+      <span class="logo-icon" style="background:#1a9e8e; color:white; border-radius:8px; padding:0 8px; font-weight:800;">H</span>
+      <span class="logo-text">Habyto</span>
+    </div>
+    <span class="step-counter">22/37</span>
+  </header>
+  <div class="progress-bar-wrap"><div class="progress-bar" style="width:59%"></div></div>
+  <div class="screen-content">
+    <h2 class="section-title">Você prefere cozinhar, comer fora ou pedir delivery?</h2>
+    <div class="option-list">
+      <div class="option-item" onclick="pickOption(this,'cooking','casa')">🍳 Cozinho em casa</div>
+      <div class="option-item" onclick="pickOption(this,'cooking','restaurante')">🍽️ Restaurante</div>
+      <div class="option-item" onclick="pickOption(this,'cooking','delivery')">📦 Delivery</div>
+      <div class="option-item" onclick="pickOption(this,'cooking','tudo')">✨ Tudo acima</div>
+    </div>
+  </div>
+</div>
+
+<!-- ===== ECONOMY (Step 19) ===== -->
+<div class="screen" id="screen-19">
+  <header class="header-centered">
+    <div class="logo-box">
+      <span class="logo-icon" style="background:#1a9e8e; color:white; border-radius:8px; padding:0 8px; font-weight:800;">H</span>
+      <span class="logo-text">Habyto</span>
+    </div>
+  </header>
+  <div class="screen-content center-content">
+    <div class="motive-icon-large">💰</div>
+    <h2 class="motive-title">Nossos usuários economizam dinheiro enquanto ficam mais saudáveis!</h2>
+    <p class="motive-body">Com refeições planejadas e menos compras impulsivas, você pode economizar até R$400 por mês.</p>
+    <div class="stat-row">
+      <div class="stat-box"><div class="stat-number">29M+</div><div class="stat-label">Usuários</div></div>
+      <div class="stat-box"><div class="stat-number">R$400</div><div class="stat-label">Economia/mês</div></div>
+      <div class="stat-box"><div class="stat-number">4,8⭐</div><div class="stat-label">Avaliação</div></div>
+    </div>
+    <button class="btn-primary btn-wide" onclick="nextScreen()">Continuar</button>
+  </div>
+</div>
+
+<!-- ===== BODY ISSUES (Step 20) ===== -->
+<div class="screen" id="screen-20">
+  <header class="header-progress">
+    <button class="back-btn" onclick="prevScreen()">‹</button>
+    <div class="logo-box">
+      <span class="logo-icon" style="background:#1a9e8e; color:white; border-radius:8px; padding:0 8px; font-weight:800;">H</span>
+      <span class="logo-text">Habyto</span>
+    </div>
+    <span class="step-counter">24/37</span>
+  </header>
+  <div class="progress-bar-wrap"><div class="progress-bar" style="width:65%"></div></div>
+  <div class="screen-content">
+    <h2 class="section-title">Você sofre com algum destes problemas?</h2>
+    <p class="section-subtitle">Você pode escolher várias opções</p>
+    <div class="option-list multi" id="bodyissues">
+      <div class="option-item multi-opt" onclick="toggleMulti(this)">🦵 Problemas no joelho</div>
+      <div class="option-item multi-opt" onclick="toggleMulti(this)">🔙 Dor nas costas</div>
+      <div class="option-item multi-opt" onclick="toggleMulti(this)">🤸 Mobilidade reduzida</div>
+      <div class="option-item multi-opt" onclick="toggleMulti(this)">😮‍💨 Falta de ar</div>
+      <div class="option-item multi-opt" onclick="toggleMulti(this)">✅ Nenhum dos anteriores</div>
+    </div>
+    <button class="btn-primary btn-wide btn-bottom" onclick="nextScreen()">Continuar</button>
+  </div>
+</div>
+
+<!-- ===== WORK SCHEDULE (Step 21) ===== -->
+<div class="screen" id="screen-21">
+  <header class="header-progress">
+    <button class="back-btn" onclick="prevScreen()">‹</button>
+    <div class="logo-box">
+      <span class="logo-icon" style="background:#1a9e8e; color:white; border-radius:8px; padding:0 8px; font-weight:800;">H</span>
+      <span class="logo-text">Habyto</span>
+    </div>
+    <span class="step-counter">26/37</span>
+  </header>
+  <div class="progress-bar-wrap"><div class="progress-bar" style="width:70%"></div></div>
+  <div class="screen-content">
+    <h2 class="section-title">Como é sua rotina de trabalho?</h2>
+    <div class="option-list">
+      <div class="option-item" onclick="pickOption(this,'work','9a5')">💼 Das 9h às 17h</div>
+      <div class="option-item" onclick="pickOption(this,'work','noturno')">🌙 Turno noturno</div>
+      <div class="option-item" onclick="pickOption(this,'work','flexivel')">⏱️ Horário flexível</div>
+      <div class="option-item" onclick="pickOption(this,'work','aposentado')">🏡 Aposentado(a)</div>
+    </div>
+  </div>
+</div>
+
+<!-- ===== BAD HABITS (Step 22) ===== -->
+<div class="screen" id="screen-22">
+  <header class="header-progress">
+    <button class="back-btn" onclick="prevScreen()">‹</button>
+    <div class="logo-box">
+      <span class="logo-icon" style="background:#1a9e8e; color:white; border-radius:8px; padding:0 8px; font-weight:800;">H</span>
+      <span class="logo-text">Habyto</span>
+    </div>
+    <span class="step-counter">28/37</span>
+  </header>
+  <div class="progress-bar-wrap"><div class="progress-bar" style="width:76%"></div></div>
+  <div class="screen-content">
+    <h2 class="section-title">Você tem algum destes hábitos?</h2>
+    <p class="section-subtitle">Você pode escolher várias opções</p>
+    <div class="option-list multi" id="habits">
+      <div class="option-item multi-opt" onclick="toggleMulti(this)">🌙 Comer tarde da noite</div>
+      <div class="option-item multi-opt" onclick="toggleMulti(this)">🥤 Refrigerantes</div>
+      <div class="option-item multi-opt" onclick="toggleMulti(this)">🍺 Bebidas alcoólicas</div>
+      <div class="option-item multi-opt" onclick="toggleMulti(this)">🚬 Fumar</div>
+      <div class="option-item multi-opt" onclick="toggleMulti(this)">🍟 Fast food</div>
+      <div class="option-item multi-opt" onclick="toggleMulti(this)">✅ Nenhum dos anteriores</div>
+    </div>
+    <button class="btn-primary btn-wide btn-bottom" onclick="nextScreen()">Continuar</button>
+  </div>
+</div>
+
+<!-- ===== WEIGHT GAIN EVENTS (Step 23) ===== -->
+<div class="screen" id="screen-23">
+  <header class="header-progress">
+    <button class="back-btn" onclick="prevScreen()">‹</button>
+    <div class="logo-box">
+      <span class="logo-icon" style="background:#1a9e8e; color:white; border-radius:8px; padding:0 8px; font-weight:800;">H</span>
+      <span class="logo-text">Habyto</span>
+    </div>
+    <span class="step-counter">29/37</span>
+  </header>
+  <div class="progress-bar-wrap"><div class="progress-bar" style="width:78%"></div></div>
+  <div class="screen-content">
+    <h2 class="section-title">Algum destes eventos levou ao ganho de peso?</h2>
+    <div class="option-list multi" id="events">
+      <div class="option-item multi-opt" onclick="toggleMulti(this)">💼 Pressão no trabalho</div>
+      <div class="option-item multi-opt" onclick="toggleMulti(this)">😷 COVID-19 / pandemia</div>
+      <div class="option-item multi-opt" onclick="toggleMulti(this)">🤰 Gravidez</div>
+      <div class="option-item multi-opt" onclick="toggleMulti(this)">😢 Término de relacionamento</div>
+      <div class="option-item multi-opt" onclick="toggleMulti(this)">🎂 Aniversários / festas</div>
+      <div class="option-item multi-opt" onclick="toggleMulti(this)">✅ Nenhum</div>
+    </div>
+    <button class="btn-primary btn-wide btn-bottom" onclick="nextScreen()">Continuar</button>
+  </div>
+</div>
+
+<!-- ===== HEIGHT (Step 24) ===== -->
+<div class="screen" id="screen-24">
+  <header class="header-progress">
+    <button class="back-btn" onclick="prevScreen()">‹</button>
+    <div class="logo-box">
+      <span class="logo-icon" style="background:#1a9e8e; color:white; border-radius:8px; padding:0 8px; font-weight:800;">H</span>
+      <span class="logo-text">Habyto</span>
+    </div>
+    <span class="step-counter">32/37</span>
+  </header>
+  <div class="progress-bar-wrap"><div class="progress-bar" style="width:86%"></div></div>
+  <div class="screen-content">
+    <h2 class="section-title">Qual é a sua altura?</h2>
+    <div class="unit-toggle">
+      <button class="unit-btn active" id="btn-cm" onclick="setUnit('cm')">cm</button>
+      <button class="unit-btn" id="btn-ft" onclick="setUnit('ft')">ft/in</button>
+    </div>
+    <div class="number-input-wrap" id="cm-input">
+      <input type="number" class="number-input" id="height-cm" placeholder="Ex: 170" min="100" max="250" />
+      <span class="unit-label">cm</span>
+    </div>
+    <div class="number-input-wrap hidden" id="ft-input">
+      <input type="number" class="number-input" id="height-ft" placeholder="Ex: 5" min="1" max="8" />
+      <span class="unit-label">ft</span>
+      <input type="number" class="number-input small" id="height-in" placeholder="Ex: 7" min="0" max="11" />
+      <span class="unit-label">in</span>
+    </div>
+    <button class="btn-primary btn-wide btn-bottom" onclick="nextScreen()">Continuar</button>
+  </div>
+</div>
+
+<!-- ===== CURRENT WEIGHT (Step 25) ===== -->
+<div class="screen" id="screen-25">
+  <header class="header-progress">
+    <button class="back-btn" onclick="prevScreen()">‹</button>
+    <div class="logo-box">
+      <span class="logo-icon" style="background:#1a9e8e; color:white; border-radius:8px; padding:0 8px; font-weight:800;">H</span>
+      <span class="logo-text">Habyto</span>
+    </div>
+    <span class="step-counter">33/37</span>
+  </header>
+  <div class="progress-bar-wrap"><div class="progress-bar" style="width:89%"></div></div>
+  <div class="screen-content">
+    <h2 class="section-title">Qual é o seu peso atual?</h2>
+    <div class="unit-toggle">
+      <button class="unit-btn active" id="btn-kg" onclick="setWeightUnit('kg')">kg</button>
+      <button class="unit-btn" id="btn-lb" onclick="setWeightUnit('lb')">lb</button>
+    </div>
+    <div class="number-input-wrap">
+      <input type="number" class="number-input" id="current-weight" placeholder="Ex: 70" min="30" max="300" />
+      <span class="unit-label" id="weight-unit-lbl">kg</span>
+    </div>
+    <button class="btn-primary btn-wide btn-bottom" onclick="nextScreen()">Continuar</button>
+  </div>
+</div>
+
+<!-- ===== GOAL WEIGHT (Step 26) ===== -->
+<div class="screen" id="screen-26">
+  <header class="header-progress">
+    <button class="back-btn" onclick="prevScreen()">‹</button>
+    <div class="logo-box">
+      <span class="logo-icon" style="background:#1a9e8e; color:white; border-radius:8px; padding:0 8px; font-weight:800;">H</span>
+      <span class="logo-text">Habyto</span>
+    </div>
+    <span class="step-counter">34/37</span>
+  </header>
+  <div class="progress-bar-wrap"><div class="progress-bar" style="width:92%"></div></div>
+  <div class="screen-content">
+    <h2 class="section-title">Qual é o seu peso ideal?</h2>
+    <div class="number-input-wrap">
+      <input type="number" class="number-input" id="goal-weight" placeholder="Ex: 60" min="30" max="300" />
+      <span class="unit-label" id="gweight-unit-lbl">kg</span>
+    </div>
+    <button class="btn-primary btn-wide btn-bottom" onclick="nextScreen()">Continuar</button>
+  </div>
+</div>
+
+<!-- ===== AGE INPUT (Step 27) ===== -->
+<div class="screen" id="screen-27">
+  <header class="header-progress">
+    <button class="back-btn" onclick="prevScreen()">‹</button>
+    <div class="logo-box">
+      <span class="logo-icon" style="background:#1a9e8e; color:white; border-radius:8px; padding:0 8px; font-weight:800;">H</span>
+      <span class="logo-text">Habyto</span>
+    </div>
+    <span class="step-counter">35/37</span>
+  </header>
+  <div class="progress-bar-wrap"><div class="progress-bar" style="width:95%"></div></div>
+  <div class="screen-content">
+    <h2 class="section-title">Quantos anos você tem?</h2>
+    <div class="number-input-wrap">
+      <input type="number" class="number-input" id="age-input" placeholder="Ex: 30" min="18" max="99" />
+      <span class="unit-label">anos</span>
+    </div>
+    <button class="btn-primary btn-wide btn-bottom" onclick="nextScreen()">Continuar</button>
+  </div>
+</div>
+
+<!-- ===== EMAIL (Step 28) ===== -->
+<div class="screen" id="screen-28">
+  <header class="header-progress">
+    <button class="back-btn" onclick="prevScreen()">‹</button>
+    <div class="logo-box">
+      <span class="logo-icon" style="background:#1a9e8e; color:white; border-radius:8px; padding:0 8px; font-weight:800;">H</span>
+      <span class="logo-text">Habyto</span>
+    </div>
+    <span class="step-counter">37/37</span>
+  </header>
+  <div class="progress-bar-wrap"><div class="progress-bar" style="width:99%"></div></div>
+  <div class="screen-content center-content">
+    <div class="loading-animation" id="loading-anim">
+      <div class="loading-ring"></div>
+      <p class="loading-text">Analisando suas respostas...</p>
+      <div class="loading-steps">
+        <div class="loading-step done">✔ Calculando seu IMC</div>
+        <div class="loading-step done">✔ Definindo janela de jejum</div>
+        <div class="loading-step">⏳ Criando plano personalizado</div>
+      </div>
+    </div>
+    <div class="email-form hidden" id="email-form">
+      <div class="email-icon">📧</div>
+      <h2 class="section-title">Digite seu e-mail para desbloquear seu plano de jejum</h2>
+      <p class="section-subtitle">Seu plano personalizado está pronto! Insira seu e-mail para acessar.</p>
+      <input type="email" class="email-input" id="email-input" placeholder="seu@email.com" />
+      <button class="btn-primary btn-wide" onclick="goToResults()">Ver meu plano →</button>
+      <p class="privacy-note">🔒 Seus dados estão protegidos. Sem spam.</p>
+    </div>
+    
+    <div class="loading-animation hidden" id="final-loading" style="text-align:center; padding-top:40px;">
+      <div class="spinner" style="border-top-color:var(--teal); margin: 0 auto 20px; width:48px; height:48px; border-width:4px;"></div>
+      <h3 style="margin-bottom:12px; font-size:20px; font-weight:800; color:var(--text);">Aguarde...</h3>
+      <p style="color:var(--text-muted); font-size:15px; line-height:1.5; font-weight:500;">O nosso Sistema de Inteligência Artificial está escrevendo e cruzando todas as suas informações metabólicas...</p>
+      
+      <div style="margin-top:24px; display:flex; flex-direction:column; gap:8px; align-items:flex-start; max-width:280px; margin:24px auto 0;">
+         <span style="font-size:13px; color:var(--teal); font-weight:700;">✔ Cruzando Idade e Peso...</span>
+         <span style="font-size:13px; color:var(--teal); font-weight:700;">✔ Calculando Déficit Calórico...</span>
+         <span style="font-size:13px; color:var(--text-muted); font-weight:600; animation:pulse 1s infinite alternate;">⏳ Encontrando o Plano Ideal...</span>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ===== RESULTS PAGE (Step 29) ===== -->
+<div class="screen" id="screen-29">
+  <div class="results-header">
+        <div class="discount-bar">
+      <span>🔥 DESCONTO RESERVADO POR <span class="countdown" id="countdown">09:59</span></span>
+      <button class="btn-results-cta" onclick="document.getElementById('pricing-section').scrollIntoView({behavior:'smooth'})">Obter Meu Plano</button>
+    </div>
+    <div style="text-align:center; padding: 24px 20px 0;">
+      <h2 style="font-size:24px; font-weight:800; margin-bottom:12px;">Seu Aplicativo Exclusivo</h2>
+      <p style="color:var(--text-muted); font-size:15px; margin-bottom:20px;">Tudo o que você precisa na palma da mão.</p>
+      <img src="https://images.unsplash.com/photo-1512941937669-90a1b58e7e9c?w=400&h=400&fit=crop" style="width:100%; max-width:320px; border-radius:20px; box-shadow:0 12px 30px rgba(0,0,0,0.15); margin-bottom:10px;" alt="Aplicativo Mockup">
+    </div>
+  </div>
+  <div class="results-body">
+    <div class="transformation-card">
+      <div class="body-compare">
+        <div class="compare-side">
+          <div class="compare-label">Seu peso</div>
+          <img class="compare-body-img" src="https://images.unsplash.com/photo-1605296867304-46d5465a13f1?w=180&h=260&fit=crop&q=80" alt="Antes" />
+          <div class="body-fat-label">Gordura corporal<br><strong id="before-fat">&gt;32%</strong></div>
+          <div class="energy-bar-row">
+            <div class="energy-bar-fill eb-before" style="width:30%"></div>
+            <div class="energy-bar-fill eb-before" style="width:30%"></div>
+          </div>
+        </div>
+        <div class="compare-arrows">»»</div>
+        <div class="compare-side">
+          <div class="compare-label">Objetivo</div>
+          <img class="compare-body-img" src="https://images.unsplash.com/photo-1517960413843-0aee8e2b3285?w=180&h=260&fit=crop&q=80" alt="Depois" />
+          <div class="body-fat-label">Gordura corporal<br><strong>14–20%</strong></div>
+          <div class="energy-bar-row">
+            <div class="energy-bar-fill" style="width:90%"></div>
+            <div class="energy-bar-fill" style="width:90%"></div>
+          </div>
+        </div>
+      </div>
+      <p class="disclaimer">* Resultados individuais podem variar.</p>
+    </div>
+
+    <h2 class="results-title">Resumo personalizado com base nas suas respostas</h2>
+
+    <div class="results-stats">
+      <div class="stat-card">
+        <div class="stat-icon">🔥</div>
+        <div class="stat-info">
+          <div class="stat-label">Calorias diárias</div>
+          <div class="stat-val" id="res-calories">1.450 kcal</div>
+        </div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-icon">💧</div>
+        <div class="stat-info">
+          <div class="stat-label">Água diária</div>
+          <div class="stat-val">2,2L</div>
+        </div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-icon">⏰</div>
+        <div class="stat-info">
+          <div class="stat-label">Protocolo de jejum</div>
+          <div class="stat-val">16:8</div>
+        </div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-icon">📅</div>
+        <div class="stat-info">
+          <div class="stat-label">Meta em</div>
+          <div class="stat-val">12 semanas</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="projection-section">
+      <h3>Sua previsão de perda de peso</h3>
+      <div class="projection-graph">
+        <div class="graph-bar-wrap">
+          <div class="graph-bar" style="height:100%"><span>Atual</span></div>
+          <div class="graph-bar goal-bar" style="height:60%"><span>Meta</span></div>
+        </div>
+        <div class="weight-labels">
+          <span class="weight-current" id="res-current-w">70 kg</span>
+          <span class="weight-goal" id="res-goal-w">58 kg</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="testimonials">
+      <h3>O que nossos usuários dizem</h3>
+      <div class="testimonial-grid">
+        <div class="testimonial-card">
+          <div class="stars">⭐⭐⭐⭐⭐</div>
+          <p>"Perdi 8kg em 2 meses seguindo o plano. Nunca me senti tão bem!"</p>
+          <div class="reviewer">— Ana C., 34 anos</div>
+        </div>
+        <div class="testimonial-card">
+          <div class="stars">⭐⭐⭐⭐⭐</div>
+          <p>"Finalmente um plano que funciona para a minha rotina. Recomendo!"</p>
+          <div class="reviewer">— Fernanda M., 42 anos</div>
+        </div>
+        <div class="testimonial-card">
+          <div class="stars">⭐⭐⭐⭐⭐</div>
+          <p>"Em 12 semanas cheguei ao meu peso ideal. Isso mudou minha vida."</p>
+          <div class="reviewer">— Juliana P., 29 anos</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="pricing-section" id="pricing-section">
+      <h2 style="font-size:32px; font-weight:800; margin-bottom:10px;">Escolha su Habyto</h2>
+      <p class="pricing-sub">Acesso imediato ao aplicativo e plano personalizado</p>
+
+      <div class="plan-cards">
+        <div class="plan-card" onclick="selectPlan(this,'mensal')">
+          <div class="plan-duration">Plano Mensal</div>
+          <div class="plan-price">R$ 29,90</div>
+          <div class="plan-per">Acesso completo por 30 dias</div>
+        </div>
+        <div class="plan-card best" onclick="selectPlan(this,'anual')">
+          <div class="plan-badge" style="background:#f97316;">OFERTA LIMITADA</div>
+          <div class="plan-duration">Plano Anual</div>
+          <div class="plan-price">R$ 97,00</div>
+          <div class="plan-per">Menos de R$ 9,00 por mês</div>
+        </div>
+      </div>
+
+      <div class="guarantee-box">
+        <span class="guarantee-icon">🛡️</span>
+        <div>
+          <strong>Garantia de 30 dias</strong>
+          <p>Se não ficar satisfeito(a), devolvemos 100% do seu dinheiro.</p>
+        </div>
+      </div>
+
+      <button id="checkout-btn" class="btn-primary btn-wide btn-cta" onclick="goToCheckout()">Começar meu plano agora →</button>
+      <p class="secure-pay">🔒 Pagamento 100% seguro e criptografado</p>
+    </div>
+  </div>
+</div>
+
+<script src="app.js"></script>
+</body>
+</html>

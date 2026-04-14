@@ -199,10 +199,7 @@
           <span class="nav-icon">📊</span><span>Dashboard</span>
         </div>
         <div class="nav-link" onclick="goPage('users')">
-          <span class="nav-icon">👥</span><span>Usuários e Assinaturas</span>
-        </div>
-        <div class="nav-link" onclick="goPage('leads')">
-          <span class="nav-icon">🛒</span><span>Leads (Abandonos)</span>
+          <span class="nav-icon">👥</span><span>Usuários</span>
         </div>
         <div class="nav-link" onclick="goPage('settings')">
           <span class="nav-icon">⚙️</span><span>Configurações</span>
@@ -285,9 +282,6 @@
             <tbody id="users-body"><tr class="empty-row"><td colspan="7">Carregando…</td></tr></tbody>
           </table>
         </div>
-      <!-- USERS -->
-      <div class="page" id="page-users">
-        <!-- ... -->
       </div>
 
       <!-- LEADS (REMARKETING) -->
@@ -502,15 +496,13 @@ function goPage(name) {
 // ── LOAD DATA ──────────────────────────────────────────
 let allUsers = [];
 let allLeads = [];
-
 async function loadData() {
   try {
-    // 1) Carregar Usuários da plataforma (Quem pagou e registrou)
+    // Adicionado LIMITE DE 500 USUÁRIOS para não estourar a memória (paginação simplificada)
     const snap = await db.collection('users').orderBy('createdAt', 'desc').limit(500).get();
     allUsers = snap.docs.map(d => ({ id: d.id, ...d.data() }));
 
-    // 2) Carregar Leads Abandonos (Quem entrou no quiz)
-    const snapLeads = await db.collection('leads').orderBy('createdAt', 'desc').limit(200).get();
+    const snapLeads = await db.collection('leads').orderBy('createdAt', 'desc').limit(500).get();
     allLeads = snapLeads.docs.map(d => ({ id: d.id, ...d.data() }));
 
     const total    = allUsers.length;
@@ -656,7 +648,7 @@ window.saveSubscription = async function() {
   const subStatus = document.getElementById('md-sub-status').value;
   if(!uid) return;
   
-  toast('Verificando bloqueio...');
+  toast('Verificando...');
   try {
     await db.collection('users').doc(uid).set({ subscriptionStatus: subStatus }, { merge: true });
     toast('Assinatura salva!');

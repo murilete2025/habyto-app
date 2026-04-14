@@ -316,6 +316,29 @@
         <div class="page-title">Configurações</div>
         <div class="page-sub">Personalize o comportamento do Habyto.</div>
         <div class="settings-grid">
+          <!-- CONTEÚDO EM DESTAQUE -->
+          <div class="s-card" style="grid-column:1/-1; border:2px solid #ddd6fe; background:#f5f3ff;">
+            <div style="display:flex;align-items:center;gap:10px;margin-bottom:6px">
+              <span style="font-size:22px">📢</span>
+              <h3 style="margin:0">Conteúdo em Destaque (Dica do Dia)</h3>
+              <span style="margin-left:auto;background:#8b5cf6;color:#fff;font-size:11px;font-weight:700;padding:3px 10px;border-radius:99px;">FEED APP</span>
+            </div>
+            <p style="color:#5b21b6;font-size:13px;margin-bottom:14px">
+              Este conteúdo aparecerá no topo do Dashboard de todos os usuários ativos. Ideal para receitas, avisos ou motivação.
+            </p>
+            <div style="display:grid; gap:10px">
+              <div>
+                <label style="font-size:11px;font-weight:700;color:var(--muted);display:block;margin-bottom:4px">Título do Destaque</label>
+                <input class="s-input" id="cfg-feat-title" placeholder="Ex: Receita de Suco Detox" style="margin-bottom:10px" />
+              </div>
+              <div>
+                <label style="font-size:11px;font-weight:700;color:var(--muted);display:block;margin-bottom:4px">Texto / Descrição</label>
+                <textarea class="s-input" id="cfg-feat-text" style="height:80px; resize:none; font-family:inherit; padding:10px;" placeholder="Escreva aqui o conteúdo que o usuário lerá..."></textarea>
+              </div>
+            </div>
+            <button class="btn-save" style="background:#8b5cf6; width:100%; margin-top:10px" onclick="saveFeatured()">✨ Publicar no App</button>
+          </div>
+
           <div class="s-card">
             <h3>🔗 Link do Quiz</h3>
             <p>URL para anúncios e campanhas.</p>
@@ -721,8 +744,11 @@ async function loadSettings() {
     fill('cfg-pixel-fb', d.pixel_fb);
     fill('cfg-pixel-kwai', d.pixel_kwai);
     
-    // Webhooks
     fill('cfg-mp-token', d.mp_access_token);
+    
+    // Conteúdo
+    fill('cfg-feat-title', d.featured_title);
+    fill('cfg-feat-text', d.featured_text);
 
     // Chave OpenAI
     const keyEl = document.getElementById('cfg-openai');
@@ -765,6 +791,16 @@ window.savePixels = async function() {
     await db.collection('config').doc('global').set({ pixel_fb: fb, pixel_kwai: kw }, { merge: true });
     toast('Pixels salvos e ativos!');
   } catch(e) { toast('Erro ao salvar pixels.'); }
+}
+
+window.saveFeatured = async function() {
+  const title = document.getElementById('cfg-feat-title').value;
+  const text  = document.getElementById('cfg-feat-text').value;
+  toast('Publicando conteúdo...');
+  try {
+    await db.collection('config').doc('global').set({ featured_title: title, featured_text: text }, { merge: true });
+    toast('📢 Conteúdo publicado com sucesso!');
+  } catch(e) { toast('Erro ao publicar conteúdo.'); }
 }
 
 // ── OPENAI KEY ─────────────────────────────────────────

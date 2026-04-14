@@ -559,9 +559,30 @@ if (btnSaveProf) btnSaveProf.addEventListener("click", function() {
     .finally(function() { btnSaveProf.textContent = "Salvar Perfil"; btnSaveProf.disabled = false; });
 });
 
+// ─── DASHBOARD CONTENT ─────────────────────────────────────
+function loadGlobalContent() {
+  db.collection("config").doc("global").get().then(function(doc) {
+    if (doc.exists) {
+      var data = doc.data();
+      var card = document.getElementById("featured-card");
+      var title = document.getElementById("feat-title");
+      var text = document.getElementById("feat-text");
+      
+      if (card && data.featured_text && data.featured_text.trim().length > 0) {
+        if (title) title.textContent = data.featured_title || "Destaque do Dia";
+        if (text) text.textContent = data.featured_text;
+        card.style.display = "block";
+      } else if (card) {
+        card.style.display = "none";
+      }
+    }
+  });
+}
+
 // ─── LOAD DASHBOARD ──────────────────────────────────────
 function loadDashboard() {
   if (!currentUid) return;
+  loadGlobalContent();
   db.collection("users").doc(currentUid).get().then(function(snap) {
     if (snap.exists) {
       var d = snap.data();

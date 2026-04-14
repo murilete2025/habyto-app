@@ -356,6 +356,29 @@
             <button class="btn-save" style="margin-top:12px" onclick="savePrices()">Salvar Preços</button>
           </div>
 
+          <!-- PIXELS MARKETING -->
+          <div class="s-card" style="grid-column:1/-1; border:2px solid var(--green); background:#f0fdfa;">
+            <div style="display:flex;align-items:center;gap:10px;margin-bottom:6px">
+              <span style="font-size:22px">🎯</span>
+              <h3 style="margin:0">Pixels de Rastreamento (Marketing)</h3>
+              <span style="margin-left:auto;background:var(--green);color:#fff;font-size:11px;font-weight:700;padding:3px 10px;border-radius:99px;">ATIVO</span>
+            </div>
+            <p style="color:var(--text);font-size:13px;margin-bottom:14px">
+              Cole aqui apenas o <strong>ID</strong> dos seus pixels. O sistema injetará o código automaticamente no Quiz e no App.
+            </p>
+            <div style="display:grid; grid-template-columns:1fr 1fr; gap:15px">
+              <div>
+                <label style="font-size:12px;font-weight:700;color:var(--muted);display:block;margin-bottom:4px">Facebook Pixel ID</label>
+                <input class="s-input" id="cfg-pixel-fb" placeholder="Ex: 123456789012345" style="margin-bottom:0" />
+              </div>
+              <div>
+                <label style="font-size:12px;font-weight:700;color:var(--muted);display:block;margin-bottom:4px">Kwai Pixel ID</label>
+                <input class="s-input" id="cfg-pixel-kwai" placeholder="Ex: 51234567890" style="margin-bottom:0" />
+              </div>
+            </div>
+            <button class="btn-save" style="margin-top:15px; width:100%" onclick="savePixels()">🚀 Salvar IDs de Rastreamento</button>
+          </div>
+
           <!-- OPENAI KEY -->
           <div class="s-card" style="grid-column:1/-1; border:2px solid #fef3c7; background:#fffbeb;">
             <div style="display:flex;align-items:center;gap:10px;margin-bottom:6px">
@@ -675,6 +698,10 @@ async function loadSettings() {
     fill('cfg-quiz', d.quiz_url); fill('cfg-mp-m', d.mp_mensal);
     fill('cfg-mp-a', d.mp_anual); fill('cfg-fasting', d.fasting_default);
     fill('cfg-pm', d.price_mensal); fill('cfg-pa', d.price_anual);
+    
+    // Pixels
+    fill('cfg-pixel-fb', d.pixel_fb);
+    fill('cfg-pixel-kwai', d.pixel_kwai);
 
     // Chave OpenAI
     const keyEl = document.getElementById('cfg-openai');
@@ -699,17 +726,28 @@ async function saveCfg(key, inputId) {
   } catch(e) { toast('❌ Erro: ' + e.message); }
 }
 
-async function savePrices() {
-  const pm = document.getElementById('cfg-pm')?.value;
-  const pa = document.getElementById('cfg-pa')?.value;
+window.savePrices = async function() {
+  const pm = document.getElementById('cfg-pm').value;
+  const pa = document.getElementById('cfg-pa').value;
+  toast('Salvando preços...');
   try {
     await db.collection('config').doc('global').set({ price_mensal: pm, price_anual: pa }, { merge: true });
-    toast('✅ Preços salvos!');
-  } catch(e) { toast('❌ Erro: ' + e.message); }
+    toast('Preços atualizados!');
+  } catch(e) { toast('Erro ao salvar preços.'); }
+}
+
+window.savePixels = async function() {
+  const fb = document.getElementById('cfg-pixel-fb').value.trim();
+  const kw = document.getElementById('cfg-pixel-kwai').value.trim();
+  toast('Configurando pixels...');
+  try {
+    await db.collection('config').doc('global').set({ pixel_fb: fb, pixel_kwai: kw }, { merge: true });
+    toast('Pixels salvos e ativos!');
+  } catch(e) { toast('Erro ao salvar pixels.'); }
 }
 
 // ── OPENAI KEY ─────────────────────────────────────────
-async function saveOpenAiKey() {
+window.saveOpenAiKey = async function() {
   const keyEl    = document.getElementById('cfg-openai');
   const statusEl = document.getElementById('openai-status');
   const warnEl   = document.getElementById('openai-warning');

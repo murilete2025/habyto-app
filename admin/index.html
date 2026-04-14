@@ -230,30 +230,36 @@
         <div class="page-title">Dashboard</div>
         <div class="page-sub" id="last-update">Carregando…</div>
 
-        <div class="metrics">
+        <div class="metrics" style="grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));">
+          <div class="metric">
+            <div class="metric-icon">💰</div>
+            <div class="metric-label">Faturamento Hoje</div>
+            <div class="metric-value" id="m-revenue-day">R$ 0,00</div>
+            <div class="metric-sub">Vendas aprovadas hoje</div>
+          </div>
+          <div class="metric">
+            <div class="metric-icon">📈</div>
+            <div class="metric-label">Faturamento Mês</div>
+            <div class="metric-value" id="m-revenue-month">R$ 0,00</div>
+            <div class="metric-sub">Total no mês atual</div>
+          </div>
+          <div class="metric">
+            <div class="metric-icon">💎</div>
+            <div class="metric-label">Assinantes Ativos</div>
+            <div class="metric-value" id="m-active-subs">0</div>
+            <div class="metric-sub">Usuários com acesso liberado</div>
+          </div>
           <div class="metric">
             <div class="metric-icon">👤</div>
             <div class="metric-label">Total Usuários</div>
-            <div class="metric-value" id="m-total">—</div>
-            <div class="metric-sub">Cadastros no app</div>
+            <div class="metric-value" id="m-total">0</div>
+            <div class="metric-sub">Base total de cadastros</div>
           </div>
           <div class="metric">
-            <div class="metric-icon">✅</div>
-            <div class="metric-label">Perfis Completos</div>
-            <div class="metric-value" id="m-complete">—</div>
-            <div class="metric-sub">Com dados de saúde</div>
-          </div>
-          <div class="metric">
-            <div class="metric-icon">🔥</div>
-            <div class="metric-label">Em Jejum Agora</div>
-            <div class="metric-value" id="m-fasting">—</div>
-            <div class="metric-sub">Usuários ativos</div>
-          </div>
-          <div class="metric">
-            <div class="metric-icon">📋</div>
-            <div class="metric-label">Planos por IA</div>
-            <div class="metric-value" id="m-plans">—</div>
-            <div class="metric-sub">Planos semanais gerados</div>
+            <div class="metric-icon">🛒</div>
+            <div class="metric-label">Leads (Abandonos)</div>
+            <div class="metric-value" id="m-leads">0</div>
+            <div class="metric-sub">Carrinhos não finalizados</div>
           </div>
         </div>
 
@@ -569,9 +575,18 @@ function goPage(name) {
 let allUsers = [];
 let allLeads = [];
 let allPosts = [];
+let globalPrices = { mensal: 29.90, anual: 97.00 };
 
 async function loadData() {
   try {
+    // 0) Carregar Configs de Preço primeiro para o cálculo
+    const configRes = await db.collection('config').doc('global').get();
+    if (configRes.exists) {
+        const d = configRes.data();
+        globalPrices.mensal = parseFloat(d.price_mensal) || 29.90;
+        globalPrices.anual  = parseFloat(d.price_anual) || 97.00;
+    }
+
     // 1) Carregar Usuários
     const snap = await db.collection('users').orderBy('createdAt', 'desc').limit(500).get();
     allUsers = snap.docs.map(d => ({ id: d.id, ...d.data() }));
@@ -585,18 +600,42 @@ async function loadData() {
     allPosts = snapPosts.docs.map(d => ({ id: d.id, ...d.data() }));
 
     const total    = allUsers.length;
-    const complete = allUsers.filter(u => u.age && u.height && u.weight && u.gender).length;
-    const fasting  = allUsers.filter(u => u.isFasting).length;
-    const plans    = allUsers.filter(u => u.lastGeneratedPlan).length;
+    
+    // CÁLCULOS FINANCEIROS
+    const activeSubs = allUsers.filter(u => u.subscriptionStatus === 'active' || !u.subscriptionStatus); // Considera active por padrão se não tiver campo
+    let revDay = 0;
+    let revMonth = 0;
+    
+    const now = new Date();
+    const todayStr = now.toDateString();
+    const thisMonth = now.getMonth();
+    const thisYear = now.getFullYear();
 
-    setEl('m-total', total + (total === 500 ? '+' : ''));
-    setEl('m-complete', complete);
-    setEl('m-fasting', fasting);
-    setEl('m-plans', plans);
+    activeSubs.forEach(u => {
+      if (!u.createdAt) return;
+      const d = u.createdAt.toDate ? u.createdAt.toDate() : new Date(u.createdAt);
+      const price = (u.quizResults?.selectedPlan === 'anual') ? globalPrices.anual : globalPrices.mensal;
+      
+      // Se foi criado hoje
+      if (d.toDateString() === todayStr) {
+        revDay += price;
+      }
+      
+      // Se foi criado este mês
+      if (d.getMonth() === thisMonth && d.getFullYear() === thisYear) {
+        revMonth += price;
+      }
+    });
 
-    const now = new Date().toLocaleString('pt-BR');
-    setEl('last-update', 'Atualizado: ' + now);
-    setEl('dash-time', now);
+    setEl('m-total', total);
+    setEl('m-active-subs', activeSubs.length);
+    setEl('m-leads', allLeads.length);
+    setEl('m-revenue-day', 'R$ ' + revDay.toLocaleString('pt-BR', { minimumFractionDigits: 2 }));
+    setEl('m-revenue-month', 'R$ ' + revMonth.toLocaleString('pt-BR', { minimumFractionDigits: 2 }));
+
+    const updateTime = new Date().toLocaleString('pt-BR');
+    setEl('last-update', 'Atualizado: ' + updateTime);
+    setEl('dash-time', updateTime);
 
     renderRecent(allUsers.slice(0, 5));
     renderUsers(allUsers);

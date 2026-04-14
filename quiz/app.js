@@ -271,7 +271,7 @@ document.addEventListener('DOMContentLoaded', () => {
 });
 
 // ===== GO TO FINAL CHECKOUT =====
-function goToCheckout() {
+async function goToCheckout() {
   if (!state.selectedPlan) {
       alert("Por favor, selecione um plano para continuar.");
       document.getElementById('pricing-section').scrollIntoView({behavior:'smooth'});
@@ -280,6 +280,10 @@ function goToCheckout() {
 
   // Save full state to localStorage for the App to pick up
   localStorage.setItem('quiz_results', JSON.stringify(state));
+  const btn = document.getElementById('checkout-btn');
+  const originalText = btn.textContent;
+  btn.textContent = "Processando pagamento...";
+  btn.disabled = true;
 
   const params = new URLSearchParams({
     age: state.age2 || state.age,
@@ -291,15 +295,30 @@ function goToCheckout() {
     plan: state.selectedPlan
   }).toString();
   
-  // Aqui você deve substituir pelos seus links reais do Mercado Pago
-  const checkoutLinks = {
-    'mensal': 'https://www.mercadopago.com.br/checkout/v1/payment/redirect/?preference-id=SEU_ID_PLANO_MENSAL',
-    'anual': 'https://www.mercadopago.com.br/checkout/v1/payment/redirect/?preference-id=SEU_ID_PLANO_ANUAL'
-  };
+  try {
+    // Busca dados de pagamento ao vivo do painel Admin de forma super leve
+    const fbRes = await fetch("https://firestore.googleapis.com/v1/projects/app-jejum-emagrecimento/databases/(default)/documents/config/global");
+    const fbData = await fbRes.json();
+    
+    if (fbData && fbData.fields) {
+      let checkoutUrl = '';
+      if (state.selectedPlan === 'mensal' && fbData.fields.mp_mensal?.stringValue) {
+        checkoutUrl = fbData.fields.mp_mensal.stringValue;
+      } else if (state.selectedPlan === 'anual' && fbData.fields.mp_anual?.stringValue) {
+        checkoutUrl = fbData.fields.mp_anual.stringValue;
+      }
+      
+      if (checkoutUrl && checkoutUrl.includes('http')) {
+        // Envia o usuário com os parâmetros UTM e dados salvos no cache pro MP
+        window.location.href = checkoutUrl;
+        return;
+      }
+    }
+  } catch(e) {
+    console.warn("Erro ao ler links de checkout", e);
+  }
 
-  console.log("Iniciando checkout do plano:", state.selectedPlan);
-  
-  // Por enquanto, redireciona direto para o app para você testar o fluxo
-  // Quando tiver os links, basta mudar para: window.location.href = checkoutLinks[state.selectedPlan];
+  // Fallback: se os botões do Mercado Pago lá no Painel Admin ainda estiverem vazios
+  console.log("Nenhum link ativo encontrado no admin, direcionando para dashboard demo.");
   window.location.href = `/?${params}`;
 }

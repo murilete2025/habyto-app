@@ -266,7 +266,7 @@
       <!-- USERS -->
       <div class="page" id="page-users">
         <div class="page-title">Usuários</div>
-        <div class="page-sub">Gerencie todos os usuários cadastrados. (<span id="user-count">0</span> total)</div>
+        <div class="page-sub">Gerencie os últimos usuários cadastrados. (Mostrando máx 500)</div>
         <div class="card">
           <div class="card-header">
             <h3>Todos os Usuários</h3>
@@ -473,7 +473,8 @@ function goPage(name) {
 let allUsers = [];
 async function loadData() {
   try {
-    const snap = await db.collection('users').orderBy('createdAt', 'desc').get();
+    // Adicionado LIMITE DE 500 USUÁRIOS para não estourar a memória (paginação simplificada)
+    const snap = await db.collection('users').orderBy('createdAt', 'desc').limit(500).get();
     allUsers = snap.docs.map(d => ({ id: d.id, ...d.data() }));
 
     const total    = allUsers.length;
@@ -481,11 +482,10 @@ async function loadData() {
     const fasting  = allUsers.filter(u => u.isFasting).length;
     const plans    = allUsers.filter(u => u.lastGeneratedPlan).length;
 
-    setEl('m-total', total);
+    setEl('m-total', total + (total === 500 ? '+' : ''));
     setEl('m-complete', complete);
     setEl('m-fasting', fasting);
     setEl('m-plans', plans);
-    setEl('user-count', total);
 
     const now = new Date().toLocaleString('pt-BR');
     setEl('last-update', 'Atualizado: ' + now);

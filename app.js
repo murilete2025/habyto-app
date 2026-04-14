@@ -575,23 +575,63 @@ function loadDashboard() {
       var selGoal = document.getElementById("select-fast-goal");
       if (selGoal) selGoal.value = fastingGoal;
 
-      var todayStr   = new Date().toDateString();
-      var lastCalDate = d.lastCalorieDate ? d.lastCalorieDate.toDate().toDateString() : "";
-      
+      // Verificação da Data para Reset (Calorias e Água) e Cálculo do Streak
+      var today = new Date();
+      var todayStr = today.toDateString();
+
       // Carrega status de notificação do banco
       notifiedFastEnd = (d.lastNotifiedFast === todayStr);
       notified30m     = (d.lastNotified30m === todayStr);
       notified5m      = (d.lastNotified5m  === todayStr);
 
-      if (lastCalDate !== todayStr) {
-        dailyCalories = 0; waterCount = 0;
-        db.collection("users").doc(currentUid).set({ dailyCalories:0, waterGlasses:0, lastCalorieDate:new Date() }, { merge:true });
+      var lastCalDate = d.lastCalorieDate ? d.lastCalorieDate.toDate().toDateString() : "";
+      
+      var lastCheckInDate = d.lastCheckIn ? d.lastCheckIn.toDate() : null;
+      var streakCount = d.streakCount || 0;
+      var needsStreakUpdate = false;
+
+      // Lógica de Ocorrência (Streak)
+      if (!lastCheckInDate || lastCheckInDate.toDateString() !== todayStr) {
+        var yesterday = new Date();
+        yesterday.setDate(yesterday.getDate() - 1);
+        
+        if (lastCheckInDate && lastCheckInDate.toDateString() === yesterday.toDateString()) {
+          // Logou ontem, então conta continua
+          streakCount++;
+        } else {
+          // Passou mais de um dia sem logar ou é novo, reinicia
+          streakCount = 1;
+        }
+        needsStreakUpdate = true;
+      }
+
+      // Lógica de Reset Diário
+      var needsCalorieReset = (lastCalDate !== todayStr);
+
+      if (needsCalorieReset || needsStreakUpdate) {
+        var updatePayload = {};
+        
+        if (needsCalorieReset) {
+          dailyCalories = 0; waterCount = 0;
+          updatePayload.dailyCalories = 0;
+          updatePayload.waterGlasses = 0;
+          updatePayload.lastCalorieDate = today;
+        } else {
+          dailyCalories = d.dailyCalories || 0;
+        }
+
+        if (needsStreakUpdate) {
+          updatePayload.lastCheckIn = today;
+          updatePayload.streakCount = streakCount;
+        }
+
+        db.collection("users").doc(currentUid).set(updatePayload, { merge: true });
       } else {
         dailyCalories = d.dailyCalories || 0;
       }
 
       var streakEl = document.getElementById("streak-count");
-      if (streakEl) streakEl.textContent = d.streakCount || 0;
+      if (streakEl) streakEl.textContent = streakCount;
 
       var banner = document.getElementById("profile-banner");
       if (banner) banner.classList.toggle("hidden", !!(d.age && d.height && d.weight && d.gender));

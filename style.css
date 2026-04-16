@@ -260,11 +260,19 @@ input:focus, select:focus {
 
 /* ─── MACROS ───────────────────────────────────────── */
 .macros-grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 12px; }
-.macro-col { display: flex; flex-direction: column; align-items: center; gap: 6px; }
-.macro-name { font-size: 10px; text-transform: uppercase; font-weight: 700; color: var(--muted); letter-spacing: .5px; }
-.macro-bar { width: 100%; height: 5px; background: var(--border); border-radius: 99px; overflow: hidden; }
-.macro-fill { height: 100%; border-radius: 99px; transition: width .4s ease; }
-.macro-val { font-size: 13px; font-weight: 700; }
+.macro-col { flex: 1; text-align: center; }
+.macro-name { display: block; font-size: 11px; font-weight: 700; color: var(--muted); text-transform: uppercase; margin-bottom: 4px; }
+.macro-val { font-size: 14px; font-weight: 800; color: var(--text); }
+.macro-bar { height: 4px; background: var(--border); border-radius: 2px; margin-top: 6px; overflow: hidden; }
+.macro-bar-fill { height: 100%; width: 0; transition: width 0.3s; }
+
+/* Refeição Selection */
+.meal-cat-btn {
+  background: var(--surface); border: 1px solid var(--border); border-radius: 12px;
+  padding: 12px; font-weight: 700; font-size: 14px; color: var(--text); cursor: pointer; transition: 0.2s;
+}
+.meal-cat-btn:hover { border-color: var(--green); }
+.meal-cat-btn.active { background: var(--green-light); border-color: var(--green); color: var(--green); }
 
 /* ─── WATER DOTS ───────────────────────────────────── */
 .water-dots { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 10px; }
@@ -360,3 +368,23 @@ input:focus, select:focus {
 .nav-btn svg { transition: color .2s; }
 .nav-btn.active { color: var(--green); }
 .nav-btn span { font-size: 10px; }
+
+/* ─── ELITE UI ─────────────────────────────────────── */
+.chart-svg { overflow: visible; }
+.chart-path { 
+  fill: none; stroke: var(--green); stroke-width: 3; 
+  stroke-linecap: round; stroke-linejoin: round;
+  filter: drop-shadow(0 4px 8px var(--green-glow));
+  stroke-dasharray: 1000; stroke-dashoffset: 1000;
+  animation: chart-draw 1.5s ease-out forwards;
+}
+@keyframes chart-draw { to { stroke-dashoffset: 0; } }
+
+.chart-point { fill: var(--green); stroke: white; stroke-width: 2; transition: r .2s; cursor: pointer; }
+.chart-point:hover { r: 6px; }
+
+.chart-area { fill: url(#chart-gradient); opacity: 0.1; }
+
+.view { transition: opacity .35s, transform .35s; }
+.view.hidden { opacity: 0; transform: translateY(10px); pointer-events: none; }
+.view.active { opacity: 1; transform: translateY(0); pointer-events: auto; }

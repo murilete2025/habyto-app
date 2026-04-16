@@ -40,6 +40,7 @@ export default async function handler(req, res) {
     const gender = userData.gender || 'feminino';
     const body = userData.body || 'não especificado';
     const activityLevel = userData.activityLevel || '1.2';
+    const goalType = userData.goalType || 'perda_peso';
     
     const context = userData.context || {};
     const goals = (context.goals || []).join(", ");
@@ -50,23 +51,19 @@ export default async function handler(req, res) {
 
     const systemPrompt = `
       Você é um Nutricionista Especialista em Jejum Intermitente e Personal Trainer de alto nível.
-      Gere um Plano Semanal Completo (7 dias, de Segunda a Domingo) focado em emagrecimento rápido e saudável.
+      Gere um Plano Semanal Completo (7 dias, de Segunda a Domingo) focado em: ${goalType === 'perda_peso' ? 'Emagrecimento Rápido' : 'Ganho de Massa e Tonificação'}.
       
       Contexto do Cliente:
       - Perfil: ${age} anos, gênero ${gender}, altura ${height}cm.
       - Peso Atual: ${weight}kg. Meta: ${goalWeight}kg.
-      - Objetivos: ${goals}
-      - Preocupações: ${concerns}
-      - Alimentos a evitar/restrições: ${excluded_foods}
-      - Rotina diária: ${routine}
-      - Número de refeições preferido: ${preferred_meals}
-      - Foco corporal: ${body}
       - Nível de Atividade: ${activityLevel}.
+      - Alimentos a evitar: ${excluded_foods}
       
-      Requisitos:
-      1. Cardápio: ${preferred_meals} refeições por dia. Cada refeição com 3 OPÇÕES claras.
-      2. Lista de Compras: Lista consolidada por categorias para a semana.
-      3. Treino: Exercícios para os 7 dias focando em "${body}".
+      Requisitos OBRIGATÓRIOS:
+      1. Cardápio: ${preferred_meals} refeições por dia. Cada uma com 3 OPÇÕES.
+      2. Treino Personalizado: Crie treinos específicos para o gênero ${gender} e para o objetivo ${goalType}. 
+         Se for Ganho de Massa, foque em hipertrofia. Se for Perda de Peso, foque em queima calórica e HIIT.
+      3. Lista de Compras: Organizada para a semana.
       4. Formato: JSON rigoroso.
     `;
 
@@ -88,9 +85,16 @@ export default async function handler(req, res) {
     });
 
     const data = await response.json();
-    const aiContent = data.choices[0].message.content;
-    
-    return res.status(200).send(aiContent);
+    if (!data.choices || !data.choices[0]) {
+      return res.status(500).json({ error: 'Erro na resposta da OpenAI', details: data });
+    }
+
+    let rawContent = data.choices[0].message.content;
+    const jsonMatch = rawContent.match(/\{[\s\S]*\}/);
+    if (!jsonMatch) throw new Error("A IA não retornou um formato JSON válido.");
+
+    const aiContent = JSON.parse(jsonMatch[0]);
+    return res.status(200).json(aiContent);
 
   } catch (error) {
     return res.status(500).json({ error: error.message });

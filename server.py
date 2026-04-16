@@ -30,6 +30,7 @@ class APIServerHandler(http.server.SimpleHTTPRequestHandler):
             gender = user_data.get('gender', 'feminino')
             body = user_data.get('body', 'não especificado')
             activityLevel = user_data.get('activityLevel', '1.2')
+            goalType = user_data.get('goalType', 'perda_peso')
             
             # Contexto extra do Quiz
             context_raw = user_data.get('context', {})
@@ -50,23 +51,19 @@ class APIServerHandler(http.server.SimpleHTTPRequestHandler):
             # O super "Prompt Especialista" - Agora Gerando a Semana Inteira + 3 Opções + Lista de Compras
             system_prompt = f"""
 Você é um Nutricionista Especialista em Jejum Intermitente e Personal Trainer de alto nível.
-Gere um Plano Semanal Completo (7 dias, de Segunda a Domingo) focado em emagrecimento rápido e saudável.
+Gere um Plano Semanal Completo (7 dias, de Segunda a Domingo) focado em: {'Emagrecimento Rápido' if goalType == 'perda_peso' else 'Ganho de Massa e Tonificação'}.
 
 Contexto do Cliente:
 - Perfil: {age} anos, gênero {gender}, altura {height}cm.
 - Peso Atual: {weight}kg. Meta: {goalWeight}kg.
-- Objetivos: {goals}
-- Preocupações: {concerns}
-- Alimentos a evitar/restrições: {excluded_foods}
-- Rotina diária: {routine}
-- Número de refeições preferido: {preferred_meals}
-- Foco corporal: {body}
 - Nível de Atividade: {activityLevel}.
+- Alimentos a evitar: {excluded_foods}
 
-Requisitos:
-1. Cardápio: {preferred_meals} refeições por dia. Para CADA refeição, ofereça 3 OPÇÕES (ex: Opção 1, Opção 2, Opção 3).
-2. Lista de Compras: Gere uma lista consolidada de TUDO que o usuário precisará comprar para seguir o plano da semana inteira, organizada por categorias (ex: Proteínas, Gorduras, Vegetais).
-3. Treino: Exercícios específicos para CADA UM dos 7 dias da semana (Segunda a Domingo). Não deixe nenhum dia sem treino ou sem meta clara de movimento, focando no objetivo "{body}".
+Requisitos OBRIGATÓRIOS:
+1. Cardápio: {preferred_meals} refeições por dia. Para CADA refeição, ofereça 3 OPÇÕES claras.
+2. Treino Personalizado: Crie treinos específicos para o gênero {gender} e para o objetivo {goalType}. 
+   Se for Ganho de Massa, foque em hipertrofia. Se for Perda de Peso, foque em queima calórica e HIIT.
+3. Lista de Compras: Organizada para a semana.
 4. Formato: JSON rigoroso.
 
 Responda EXATAMENTE no formato JSON:
@@ -202,6 +199,56 @@ Responda EXATAMENTE no formato JSON:
                 self.send_response(500)
                 self.end_headers()
                 self.wfile.write(json.dumps({"error": "OpenAI Error", "details": e.read().decode()}).encode('utf-8'))
+            except Exception as e:
+                self.send_response(500)
+                self.end_headers()
+                self.wfile.write(json.dumps({"error": str(e)}).encode('utf-8'))
+        
+        elif self.path == '/api/generate-workout':
+            content_length = int(self.headers.get('Content-Length', 0))
+            post_data = self.rfile.read(content_length)
+            user_data = json.loads(post_data.decode('utf-8'))
+            
+            gender = user_data.get('gender', 'feminino')
+            goal = user_data.get('goal', 'perda_peso')
+            days = user_data.get('days', '3')
+            level = user_data.get('level', 'iniciante')
+
+            system_prompt = f"""
+            Você é um Personal Trainer de elite. Gere um cronograma de treino semanal personalizado.
+            Objetivo: {'Queima Calórica' if goal == 'perda_peso' else 'Ganho de Massa'}.
+            Frequência: {days} dias por semana.
+            Nível: {level}. Gênero: {gender}.
+            Retorne APENAS um JSON no formato:
+            {{
+              "workout_plan": [
+                {{ "day": "Segunda-feira", "focus": "Foco", "title": "Treino", "description": "Detalhes" }}
+              ]
+            }} (para 7 dias)
+            """
+
+            req = urllib.request.Request(
+                url='https://api.openai.com/v1/chat/completions',
+                data=json.dumps({
+                    "model": "gpt-4o-mini",
+                    "messages": [{"role": "system", "content": system_prompt}],
+                    "response_format": {"type": "json_object"}
+                }).encode('utf-8'),
+                headers={'Content-Type': 'application/json', 'Authorization': f'Bearer {OPENAI_API_KEY}'},
+                method='POST'
+            )
+
+            try:
+                with urllib.request.urlopen(req) as response:
+                    ai_content = response.read().decode('utf-8')
+                    ai_data = json.loads(ai_content)
+                    final_json = ai_data["choices"][0]["message"]["content"]
+                    
+                    self.send_response(200)
+                    self.send_header('Content-type', 'application/json')
+                    self.send_header('Access-Control-Allow-Origin', '*')
+                    self.end_headers()
+                    self.wfile.write(final_json.encode('utf-8'))
             except Exception as e:
                 self.send_response(500)
                 self.end_headers()

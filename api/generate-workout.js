@@ -1,4 +1,5 @@
 export default async function handler(req, res) {
+  // Habilitar CORS
   res.setHeader('Access-Control-Allow-Origin', '*');
   res.setHeader('Access-Control-Allow-Methods', 'POST, OPTIONS');
   res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
@@ -12,7 +13,7 @@ export default async function handler(req, res) {
   }
 
   try {
-    let { image } = req.body;
+    const { gender, goal, weight, height, days, level } = req.body;
     let apiKey = process.env.OPENAI_API_KEY;
 
     // Fallback: Tenta buscar a chave salva no Painel Admin (Firestore)
@@ -29,14 +30,33 @@ export default async function handler(req, res) {
     }
 
     if (!apiKey) {
-      return res.status(500).json({ error: 'Chave da OpenAI não configurada no Vercel nem no Admin.' });
+      return res.status(500).json({ error: 'Chave da OpenAI não configurada.' });
     }
 
-    if (image.includes("base64,")) {
-      image = image.split("base64,")[1];
-    }
-
-    const visionPrompt = "Você é um contador de calorias especialista. Olhe para a foto e estime o número de calorias totais e o nome do prato. Retorne APENAS um JSON no formato: {\"calories\": 500, \"name\": \"Nome do Prato\"}.";
+    const systemPrompt = `
+      Você é um Personal Trainer de elite. Gere um cronograma de treino semanal personalizado.
+      Objetivo: ${goal === 'perda_peso' ? 'Queima Calórica e Definição' : 'Ganho de Massa Muscular'}.
+      Frequência: ${days} dias por semana.
+      Nível: ${level}.
+      Gênero: ${gender}.
+      
+      Instruções:
+      1. Se o usuário treina X dias, os outros dias devem ser marcados como "Descanso Ativo" (ex: caminhada leve ou alongamento).
+      2. Forneça o foco do dia (ex: Inferiores, Cardio, Superior).
+      
+      Retorne APENAS um JSON no formato:
+      {
+        "workout_plan": [
+          {
+            "day": "Segunda-feira",
+            "focus": "Foco do dia",
+            "title": "Nome do Treino",
+            "description": "Lista de exercícios com séries e repetições."
+          },
+          ... (7 dias)
+        ]
+      }
+    `;
 
     const response = await fetch('https://api.openai.com/v1/chat/completions', {
       method: 'POST',
@@ -47,37 +67,28 @@ export default async function handler(req, res) {
       body: JSON.stringify({
         model: "gpt-4o-mini",
         messages: [
-          {
-            role: "user",
-            content: [
-              { type: "text", text: visionPrompt },
-              {
-                type: "image_url",
-                image_url: {
-                  url: `data:image/jpeg;base64,${image}`,
-                  detail: "low"
-                }
-              }
-            ]
-          }
+          { role: "system", content: systemPrompt },
+          { role: "user", content: "Crie meu cronograma de 7 dias." }
         ],
-        temperature: 0.3
+        response_format: { type: "json_object" },
+        temperature: 0.7
       })
     });
 
     const data = await response.json();
     if (!data.choices || !data.choices[0]) {
-      return res.status(500).json({ error: 'Erro na resposta da OpenAI', details: data });
+       return res.status(500).json({ error: 'Erro na resposta da OpenAI', details: data });
     }
 
     let rawContent = data.choices[0].message.content;
     const jsonMatch = rawContent.match(/\{[\s\S]*\}/);
     if (!jsonMatch) throw new Error("A IA não retornou um formato JSON válido.");
-
+    
     const aiContent = JSON.parse(jsonMatch[0]);
-    return res.status(200).json(aiContent);
+    res.status(200).json(aiContent);
 
   } catch (error) {
-    return res.status(500).json({ error: error.message });
+    console.error("Workout Generator Error:", error);
+    res.status(500).json({ error: error.message });
   }
 }

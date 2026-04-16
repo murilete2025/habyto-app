@@ -49,14 +49,100 @@
         <label>Senha</label>
         <input id="inp-password" type="password" placeholder="••••••••" required />
       </div>
-      <p id="auth-error" class="auth-error hidden"></p>
-      <button type="submit" id="btn-auth" class="btn-primary">Entrar</button>
+    <p id="auth-error" class="auth-error hidden"></p>
+    <button type="submit" id="btn-auth" class="btn-primary">Entrar</button>
     </form>
 
     <p class="auth-switch">
       Não tem conta?
       <button id="btn-toggle-auth" class="link-btn">Criar agora</button>
     </p>
+  </div>
+</div>
+
+<!-- ───────── ONBOARDING ───────── -->
+<div id="screen-onboarding" class="screen-overlay" style="display:none; background:var(--bg);">
+  <div class="onboarding-container" style="padding:24px; width:100%; max-width:400px; text-align:center;">
+    <div id="ob-step-1" class="ob-step active">
+      <div class="loader-logo" style="margin: 0 auto 24px;">H</div>
+      <h2 style="font-size:28px; font-weight:800; margin-bottom:12px;">Olá! Qual seu nome?</h2>
+      <p style="color:var(--muted); margin-bottom:24px;">Queremos te conhecer melhor para personalizar sua experiência.</p>
+      <div class="input-group" style="text-align: left;">
+        <label>Seu Nome</label>
+        <input id="ob-name" type="text" placeholder="Como podemos te chamar?" />
+      </div>
+      <button onclick="nextObStep(2)" class="btn-primary" style="margin-top:20px;">Continuar</button>
+    </div>
+
+    <div id="ob-step-2" class="ob-step hidden">
+      <h2 style="font-size:28px; font-weight:800; margin-bottom:12px;">Seu Perfil</h2>
+      <p style="color:var(--muted); margin-bottom:24px;">Isso ajuda no cálculo do seu plano e metabolismo.</p>
+      
+      <div class="input-group" style="text-align: left;">
+        <label>Gênero</label>
+        <select id="ob-gender">
+          <option value="feminino">Feminino</option>
+          <option value="masculino">Masculino</option>
+        </select>
+      </div>
+
+      <div style="display:grid; grid-template-columns:1fr 1fr; gap:12px;">
+        <div class="input-group" style="text-align: left;">
+          <label>Altura (cm)</label>
+          <input id="ob-height" type="number" placeholder="170" />
+        </div>
+        <div class="input-group" style="text-align: left;">
+          <label>Peso Hoje (kg)</label>
+          <input id="ob-weight" type="number" placeholder="80" />
+        </div>
+      </div>
+
+      <div class="input-group" style="text-align: left;">
+        <label>Meta de Peso (kg)</label>
+        <input id="ob-goal" type="number" placeholder="Ex: 70" />
+      </div>
+
+      <div class="input-group" style="text-align: left;">
+        <label>Objetivo Principal</label>
+        <select id="ob-goal-type">
+          <option value="perda_peso">Perder Peso</option>
+          <option value="ganhar_massa">Ganhar Massa / Tonificar</option>
+          <option value="saude">Saúde e Longevidade</option>
+        </select>
+      </div>
+
+      <button onclick="finishOnboarding()" class="btn-primary" style="margin-top:20px;">Começar Agora!</button>
+    </div>
+  </div>
+</div>
+
+<!-- ───────── MEAL SELECTION MODAL ───────── -->
+<div id="modal-meal-type" class="screen-overlay hidden" style="background:rgba(0,0,0,0.7); backdrop-filter:blur(4px); z-index:9000;">
+  <div class="card" style="width:calc(100% - 40px); max-width:360px; padding:24px;">
+    <h3 style="font-size:20px; font-weight:800; margin-bottom:8px;">Identificamos sua refeição</h3>
+    
+    <div id="meal-preview-box" style="padding:12px; background:var(--bg); border-radius:12px; margin-bottom:20px; border:1px solid var(--border);">
+      <div style="display:flex; justify-content:space-between; align-items:center;">
+        <span id="label-meal-name" style="font-weight:700;">--</span>
+        <span id="label-meal-cals" style="font-weight:800; color:var(--green);">0 kcal</span>
+      </div>
+      <button onclick="editMealBeforeSave()" style="font-size:11px; color:var(--accent); background:none; border:none; padding:4px 0; margin-top:4px; cursor:pointer; font-weight:700;">✎ Editar informações</button>
+    </div>
+
+    <p style="color:var(--muted); font-size:14px; margin-bottom:12px;">Selecione o tipo de refeição:</p>
+    <div id="meal-type-grid" style="display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-bottom:20px;">
+      <button class="meal-cat-btn" onclick="selectMealCat('Café da Manhã', this)">☕ Café</button>
+      <button class="meal-cat-btn" onclick="selectMealCat('Almoço', this)">🍲 Almoço</button>
+      <button class="meal-cat-btn" onclick="selectMealCat('Lanche', this)">🥪 Lanche</button>
+      <button class="meal-cat-btn" onclick="selectMealCat('Jantar', this)">🍽️ Jantar</button>
+      <button class="meal-cat-btn" onclick="selectMealCat('Extra', this)">🍎 Extra</button>
+      <button class="meal-cat-btn" onclick="selectMealCat('Outro', this)">❓ Outro</button>
+    </div>
+
+    <div style="display:flex; gap:10px;">
+      <button class="btn-ghost" onclick="cancelMealRecord()" style="flex:1;">Cancelar</button>
+      <button id="btn-confirm-meal" class="btn-primary" onclick="confirmMealType()" style="flex:1;" disabled>Salvar Registro</button>
+    </div>
   </div>
 </div>
 
@@ -90,6 +176,56 @@
           <span>Para personalizar seu plano com IA</span>
         </div>
         <button onclick="showView('profile')" class="btn-sm">Completar</button>
+      </div>
+
+      <!-- CARD DE INFORMAÇÕES PESSOAIS -->
+      <div class="card" style="padding:16px; margin-bottom:20px; background:linear-gradient(135deg, var(--green), #0a8a78); color:white; border:none;">
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:15px;">
+          <div>
+            <h4 style="font-size:12px; font-weight:700; opacity:0.8; text-transform:uppercase;">Seu Progresso</h4>
+            <div id="stat-weight-diff" style="font-size:22px; font-weight:800; margin-top:2px;">-0.0 kg</div>
+          </div>
+          <div style="text-align:right;">
+             <span style="font-size:11px; padding:4px 8px; background:rgba(255,255,255,0.2); border-radius:12px;">Meta: <span id="stat-goal">60</span>kg</span>
+          </div>
+        </div>
+        
+        <div style="display:grid; grid-template-columns: 1fr 1fr 1fr; gap:10px; border-top:1px solid rgba(255,255,255,0.1); padding-top:15px;">
+           <div style="text-align:center;">
+             <div style="font-size:10px; opacity:0.8; margin-bottom:2px;">PESO ATUAL</div>
+             <div id="stat-current-weight" style="font-weight:700;">--</div>
+           </div>
+           <div style="text-align:center;">
+             <div style="font-size:10px; opacity:0.8; margin-bottom:2px;">ALTURA</div>
+             <div id="stat-height" style="font-weight:700;">--</div>
+           </div>
+           <div style="text-align:center;">
+             <div style="font-size:10px; opacity:0.8; margin-bottom:2px;">FALTAM</div>
+             <div id="stat-to-go" style="font-weight:700;">--</div>
+           </div>
+        </div>
+        
+        <button onclick="openWeightModal()" style="width:100%; margin-top:16px; background:rgba(255,255,255,0.15); border:none; color:white; padding:8px; border-radius:8px; font-weight:700; font-size:12px; cursor:pointer;">Atualizar meu peso hoje</button>
+      </div>
+
+      <!-- [NEW] GRÁFICO DE PESO -->
+      <div class="card" id="weight-chart-card" style="display:none; padding:16px;">
+        <div class="card-header" style="margin-bottom:15px;">
+           <span class="card-title">📈 Tendência de Peso</span>
+           <span id="chart-range" class="card-value" style="font-size:11px; opacity:0.6;">Últimos 7 registros</span>
+        </div>
+        <div id="weight-chart-container" style="height:120px; width:100%; position:relative; overflow:hidden;">
+          <!-- SVG dinâmico aqui -->
+        </div>
+      </div>
+
+      <!-- BANNER INSTALAR PWA -->
+      <div id="pwa-install-banner" class="banner-card hidden" style="background:var(--accent); margin-bottom:20px;">
+        <div class="banner-text">
+          <strong>🚀 Instalar Habyto</strong>
+          <span style="color:rgba(255,255,255,0.8);">Acesse mais rápido como um aplicativo nativo.</span>
+        </div>
+        <button id="btn-pwa-install" class="btn-sm" style="background:white; color:var(--accent);">Instalar</button>
       </div>
 
       <!-- BLOG / CONTEÚDO (FEED) -->
@@ -134,13 +270,35 @@
       </div>
 
       <!-- Calorias + Macros -->
-      <div class="card">
+      <div class="card" style="text-align:center;">
         <div class="card-header">
           <h3 class="card-title">Calorias do Dia</h3>
           <span id="calories-text" class="card-value">0 / 1500 kcal</span>
         </div>
-        <div class="progress-bar-wrap">
-          <div id="calories-bar" class="progress-bar-fill"></div>
+        
+        <!-- CALORIE RING -->
+        <div class="timer-ring-wrap" style="width:160px; height:160px; margin: 15px auto;">
+          <svg class="timer-ring" viewBox="0 0 220 220">
+            <circle class="ring-bg" cx="110" cy="110" r="96" stroke-width="14"/>
+            <circle id="calorie-progress-ring" class="ring-fill" cx="110" cy="110" r="96"
+              stroke-dasharray="603" stroke-dashoffset="603" stroke-width="14" style="stroke: var(--accent);"/>
+          </svg>
+          <div class="timer-center">
+            <div id="calorie-pct-display" style="font-size:24px; font-weight:800; color:var(--text);">0%</div>
+            <p style="font-size:10px; color:var(--muted); font-weight:700;">CONSUMIDO</p>
+          </div>
+        </div>
+
+        <div style="display:flex; justify-content:space-between; margin:16px 0; padding:12px; background:var(--bg); border-radius:14px;">
+          <div style="text-align:center; flex:1;">
+            <span style="font-size:10px; font-weight:700; color:var(--muted); text-transform:uppercase; letter-spacing:0.5px;">Manutenção</span>
+            <div id="val-maintenance" style="font-size:14px; font-weight:800;">0 kcal</div>
+          </div>
+          <div style="width:1px; background:var(--border); margin:0 10px;"></div>
+          <div style="text-align:center; flex:1;">
+            <span style="font-size:10px; font-weight:700; color:var(--muted); text-transform:uppercase; letter-spacing:0.5px;">Déficit Atual</span>
+            <div id="val-deficit-now" style="font-size:15px; font-weight:800; color:var(--green);">0 kcal</div>
+          </div>
         </div>
         <div class="macros-grid">
           <div class="macro-col">
@@ -197,26 +355,90 @@
         </div>
       </div>
 
-      <button id="btn-generate-ai" class="btn-primary btn-gradient">
-        ✨ Gerar Plano com IA
-      </button>
+      <div id="meals-empty-state" class="card" style="text-align:center; padding:32px 24px;">
+        <div style="font-size:48px; margin-bottom:16px;">🥗</div>
+        <h3 style="font-size:18px; font-weight:800; margin-bottom:8px;">Monte seu Plano Semanal</h3>
+        <p style="color:var(--muted); font-size:14px; margin-bottom:24px;">Personalize sua dieta para resultados mais rápidos.</p>
 
-      <div id="ai-loading" class="card hidden" style="text-align:center;padding:40px 20px;">
-        <div class="loader-spinner small" style="margin:0 auto 16px;"></div>
-        <p style="font-weight:700;">Criando seu plano personalizado…</p>
-        <span style="font-size:13px;color:var(--muted);">Isso pode levar ~15 segundos</span>
+        <div class="input-group" style="text-align:left;">
+          <label>Quantas refeições por dia?</label>
+          <select id="diet-meals-count">
+            <option value="2">2 refeições</option>
+            <option value="3" selected>3 refeições</option>
+            <option value="4">4 refeições</option>
+            <option value="5">5 refeições</option>
+          </select>
+        </div>
+
+        <div class="input-group" style="text-align:left;">
+          <label>Algum alimento que você NÃO come?</label>
+          <input id="diet-exclusions" type="text" placeholder="Ex: Carne vermelha, Leite, Glúten" />
+        </div>
+
+        <div class="input-group" style="text-align:left;">
+          <label>Sua rotina (ex: trabalho sentado, correria)</label>
+          <input id="diet-routine" type="text" placeholder="Ex: Trabalho em escritório" />
+        </div>
+
+        <button id="btn-generate-ai" class="btn-primary btn-gradient" style="width:100%; margin-top:12px;">
+          ✨ Gerar Meu Plano Semanal
+        </button>
       </div>
 
-      <div id="meals-container"></div>
+      <div id="meals-loading" class="hidden" style="text-align:center; padding:40px;">
+        <div class="loader-spinner" style="margin:0 auto 20px;"></div>
+        <p style="font-weight:700;">A IA está preparando seu cardápio... 🥬</p>
+        <p style="font-size:12px; color:var(--muted); margin-top:8px;">Essa análise é complexa. Você pode navegar em outras abas, o plano será salvo automaticamente ao terminar.</p>
+      </div>
+
+      <div id="meals-container" class="hidden">
+        <!-- JS Inyecta os planos aqui -->
+      </div>
     </section>
 
     <!-- ── TREINO ── -->
     <section id="view-workouts" class="view hidden">
-      <h2 style="font-weight:800;margin-bottom:20px;">Treino de Hoje</h2>
-      <div id="workouts-container">
-        <div class="card empty-state">
-          <p>🏋️ Gere seu plano semanal na aba <strong>Dieta</strong> para ver seu treino aqui.</p>
+      <div class="section-header">
+        <h2>Seu Plano de Treino</h2>
+      </div>
+
+      <!-- Form para Gerar Treino se não houver um -->
+      <div id="workouts-empty-state" class="card" style="text-align:center; padding:32px 24px;">
+        <div style="font-size:48px; margin-bottom:16px;">🏋️‍♀️</div>
+        <h3 style="font-size:18px; font-weight:800; margin-bottom:8px;">Ainda não temos seu treino</h3>
+        <p style="color:var(--muted); font-size:14px; margin-bottom:24px;">Responda abaixo para nossa IA montar seu cronograma semanal.</p>
+        
+        <div class="input-group" style="text-align:left;">
+          <label>Quantos dias por semana?</label>
+          <select id="wo-days">
+            <option value="3">3 dias</option>
+            <option value="4">4 dias</option>
+            <option value="5">5 dias</option>
+            <option value="6">6 dias</option>
+            <option value="7">Todos os dias</option>
+          </select>
         </div>
+
+        <div class="input-group" style="text-align:left;">
+          <label>Seu nível atual</label>
+          <select id="wo-level">
+            <option value="sedentario">Sedentário (Começando agora)</option>
+            <option value="iniciante">Iniciante (Pouca experiência)</option>
+            <option value="intermediario">Intermediário (Já pratico algo)</option>
+            <option value="avancado">Avançado (Consistente)</option>
+          </select>
+        </div>
+
+        <button id="btn-create-workout" class="btn-primary" onclick="generateAIWorkout()" style="width:100%; margin-top:12px;">Gerar Treino com IA</button>
+      </div>
+
+      <div id="workouts-loading" class="hidden" style="text-align:center; padding:40px;">
+        <div class="loader-spinner" style="margin:0 auto 20px;"></div>
+        <p style="font-weight:700;">Nossa IA está montando sua rotina...</p>
+      </div>
+
+      <div id="workouts-container" style="display:flex; flex-direction:column; gap:16px;">
+        <!-- JS Inyecta o plano de treino aqui -->
       </div>
     </section>
 
@@ -269,13 +491,74 @@
               <option value="1.725">Ativo</option>
             </select>
           </div>
+          <div class="input-group">
+            <label>Meta de Água (Copos)</label>
+            <input id="prof-water-goal" type="number" placeholder="8" />
+          </div>
+          <div class="input-group">
+            <label>Lembrete Água (Minutos)</label>
+            <input id="prof-water-interval" type="number" placeholder="60" />
+          </div>
           <div class="input-group" style="grid-column:1/-1;">
             <label>Meta de Jejum (horas)</label>
             <input id="prof-fasting-goal" type="number" placeholder="16" />
           </div>
         </div>
         <button id="btn-save-profile" class="btn-primary" style="margin-top:16px;">Salvar Perfil</button>
-        <button id="btn-logout" class="btn-ghost btn-danger" style="margin-top:12px;width:100%;">Sair da conta</button>
+      </div>
+
+      <!-- SEÇÃO ASSINATURA -->
+      <div class="card" style="margin-top:16px;">
+        <h3 style="font-size:16px; font-weight:800; margin-bottom:12px; display:flex; align-items:center; gap:8px;">
+          💳 Plano e Assinatura
+        </h3>
+        <div style="background:var(--bg); padding:16px; border-radius:12px; border:1px solid var(--border);">
+          <div style="display:flex; justify-content:space-between; margin-bottom:8px;">
+            <span style="color:var(--muted); font-size:14px;">Plano Atual:</span>
+            <span id="sub-plan-name" style="font-weight:700;">Habyto Premium</span>
+          </div>
+          <div style="display:flex; justify-content:space-between; margin-bottom:8px;">
+            <span style="color:var(--muted); font-size:14px;">Status:</span>
+            <span id="sub-status" class="tag tag-active" style="background:var(--green-light); color:var(--green); padding:2px 8px; border-radius:6px; font-size:12px; font-weight:700;">Ativo</span>
+          </div>
+          <div style="display:flex; justify-content:space-between;">
+            <span style="color:var(--muted); font-size:14px;">Renovação:</span>
+            <span id="sub-days-left" style="font-weight:700;">--</span>
+          </div>
+        </div>
+        <button onclick="window.location.href='https://contato.habyto.app'" style="width:100%; margin-top:16px; background:none; border:1px solid var(--border); padding:10px; border-radius:8px; font-weight:700; font-size:13px; color:var(--text); cursor:pointer;">Suporte e Pagamento</button>
+      </div>
+
+      <button id="btn-logout" class="btn-ghost btn-danger" style="margin-top:12px;width:100%;">Sair da conta</button>
+    </section>
+
+    <!-- ── HISTÓRICO ── -->
+    <section id="view-history" class="view hidden">
+      <div class="section-header">
+        <h2>Seu Progresso</h2>
+        <select id="history-filter" style="width:auto; padding:8px 12px; font-size:13px; font-weight:700;">
+          <option value="7">Últimos 7 dias</option>
+          <option value="15">Últimos 15 dias</option>
+          <option value="30">Este Mês</option>
+        </select>
+        <input type="date" id="history-date-picker" style="width:auto; padding:6px 10px; font-size:12px; margin-left:8px;" />
+      </div>
+
+      <div class="card" style="background:var(--green); color:white; margin-bottom: 20px;">
+        <div style="display:flex; justify-content:space-between; align-items:center;">
+          <div>
+            <span style="font-size:11px; font-weight:700; opacity:0.8; text-transform:uppercase; letter-spacing:0.5px;">Déficit Acumulado</span>
+            <h3 id="hist-total-deficit" style="font-size:26px; font-weight:800; letter-spacing:-1px;">0 kcal</h3>
+          </div>
+          <div style="text-align:right;">
+            <span style="font-size:11px; font-weight:700; opacity:0.8; text-transform:uppercase; letter-spacing:0.5px;">Média</span>
+            <div id="hist-avg-calories" style="font-size:18px; font-weight:700;">0 kcal</div>
+          </div>
+        </div>
+      </div>
+
+      <div id="history-list" style="display:flex; flex-direction:column; gap:12px;">
+        <!-- JS Injects Daily Summaries Here -->
       </div>
     </section>
 
@@ -308,6 +591,10 @@
       <svg width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/><path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"/></svg>
       <span>Compras</span>
     </button>
+    <button class="nav-btn" data-view="history">
+      <svg width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+      <span>Histórico</span>
+    </button>
     <button class="nav-btn" data-view="profile">
       <svg width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
       <span>Perfil</span>
@@ -316,6 +603,24 @@
 
 </div><!-- /screen-app -->
 
-<script src="app.js"></script>
+<!-- ───────── WEIGHT UPDATE MODAL ───────── -->
+<div id="modal-weight-update" class="screen-overlay hidden" style="background:rgba(0,0,0,0.7); backdrop-filter:blur(4px); z-index:9000;">
+  <div class="card" style="width:calc(100% - 40px); max-width:360px; padding:24px;">
+    <h3 style="font-size:20px; font-weight:800; margin-bottom:8px;">Nova pesagem</h3>
+    <p style="color:var(--muted); font-size:14px; margin-bottom:20px;">Mantenha seu progresso atualizado.</p>
+    
+    <div class="input-group">
+      <label>Novo Peso (kg)</label>
+      <input id="inp-new-weight" type="number" step="0.1" placeholder="Ex: 75.5" />
+    </div>
+    
+    <div style="display:flex; gap:10px; margin-top:20px;">
+      <button class="btn-ghost" onclick="closeWeightModal()" style="flex:1;">Cancelar</button>
+      <button class="btn-primary" onclick="saveNewWeight()" style="flex:1;">Salvar</button>
+    </div>
+  </div>
+</div>
+
+<script type="module" src="app.js"></script>
 </body>
 </html>

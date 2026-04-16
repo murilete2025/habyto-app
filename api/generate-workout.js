@@ -34,26 +34,28 @@ export default async function handler(req, res) {
     }
 
     const systemPrompt = `
-      Você é um Personal Trainer de elite. Gere um cronograma de treino semanal personalizado.
+      Você é um Personal Trainer de elite. Gere um cronograma de treino MENSAL (4 SEMANAS) personalizado.
       Objetivo: ${goal === 'perda_peso' ? 'Queima Calórica e Definição' : 'Ganho de Massa Muscular'}.
       Frequência: ${days} dias por semana.
       Nível: ${level}.
       Gênero: ${gender}.
       
       Instruções:
-      1. Se o usuário treina X dias, os outros dias devem ser marcados como "Descanso Ativo" (ex: caminhada leve ou alongamento).
-      2. Forneça o foco do dia (ex: Inferiores, Cardio, Superior).
+      1. Crie uma progressão de carga e intensidade ao longo das 4 semanas.
+      2. No JSON de saída, cada treinado deve indicar em qual semana (1 a 4) ele pertence.
+      3. Forneça o foco do dia (ex: Inferiores, Cardio, Superior).
       
       Retorne APENAS um JSON no formato:
       {
         "workout_plan": [
           {
+            "week": 1,
             "day": "Segunda-feira",
             "focus": "Foco do dia",
             "title": "Nome do Treino",
-            "description": "Lista de exercícios com séries e repetições."
+            "description": "Séries e repetições."
           },
-          ... (7 dias)
+          ... (gerar para as 4 semanas, totalizando 28-30 entradas dependendo da frequência)
         ]
       }
     `;
@@ -68,7 +70,7 @@ export default async function handler(req, res) {
         model: "gpt-4o-mini",
         messages: [
           { role: "system", content: systemPrompt },
-          { role: "user", content: "Crie meu cronograma de 7 dias." }
+          { role: "user", content: "Crie meu cronograma mensal completo de 4 semanas." }
         ],
         response_format: { type: "json_object" },
         temperature: 0.7

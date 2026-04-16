@@ -53,7 +53,7 @@ export async function generateAIWorkout() {
   }
 }
 
-export function renderWorkoutPlan(plan) {
+export function renderWorkoutPlan(plan, weekFilter = 1) {
   const container = document.getElementById("workouts-container");
   const empty = document.getElementById("workouts-empty-state");
   if (!container) return;
@@ -65,7 +65,22 @@ export function renderWorkoutPlan(plan) {
   }
 
   if (empty) empty.classList.add("hidden");
-  container.innerHTML = plan.map((item, idx) => `
+
+  const filtered = plan.filter(p => !p.week || p.week == weekFilter);
+  
+  const weekSelector = `
+    <div style="display:flex; gap:8px; margin-bottom:20px; overflow-x:auto; padding-bottom:8px;">
+      ${[1,2,3,4].map(w => `
+        <button class="opt-btn ${w == weekFilter ? 'active' : ''}" onclick="renderWorkoutPlan(null, ${w})">Semana ${w}</button>
+      `).join("")}
+    </div>
+  `;
+
+  // Salvar plano globalmente para o seletor funcionar
+  if (plan) window._currentWorkoutPlan = plan;
+  const activePlan = plan || window._currentWorkoutPlan;
+
+  container.innerHTML = weekSelector + activePlan.filter(p => !p.week || p.week == weekFilter).map((item, idx) => `
     <div class="card" style="margin-bottom:12px; border-left:4px solid var(--accent);">
       <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
         <h4 style="font-weight:800; color:var(--accent);">${item.day}</h4>
@@ -77,7 +92,7 @@ export function renderWorkoutPlan(plan) {
     </div>
   `).join("") + `
     <button onclick="generateAIWorkout()" class="btn-ghost" style="width:100%; margin:20px 0; border:1px dashed var(--border);">
-      ✨ Gerar Novo Cronograma com IA
+      ✨ Gerar Novo Cronograma Mensal com IA
     </button>
   `;
 }
